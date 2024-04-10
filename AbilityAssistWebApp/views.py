@@ -6,6 +6,8 @@ from django.contrib.auth import logout as auth_logout
 from .models import UserProfile, TravelHistory
 from .forms import CustomUserCreationForm, LoginForm
 from django.contrib import messages
+from django.core.mail import send_mail
+from django.urls import reverse
 def index(request):
     return render(request, 'index.html')
 
@@ -93,3 +95,29 @@ def user_logout(request):
 def travel_history(request):
     travel_entries = TravelHistory.objects.filter(user=request.user)
     return render(request, 'travel_history.html', {'travel_entries': travel_entries})
+
+def about(request):
+    return render(request, 'about.html')
+
+def contact(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        message = request.POST.get('message')
+
+        if not name or not email or not message:
+            messages.error(request, 'Please fill in all fields.')
+            return redirect(reverse('contact'))
+
+        send_mail(
+            'New message from AbilityAssist contact form',
+            f'Name: {name}\nEmail: {email}\nMessage: {message}',
+            'abilityassistcompany@gmail.com',
+            ['abilityassistcompany@gmail.com'],
+            fail_silently=False,
+        )
+
+        messages.success(request, 'Your message has been sent successfully.')
+        return redirect(reverse('contact'))
+
+    return render(request, 'contact.html')

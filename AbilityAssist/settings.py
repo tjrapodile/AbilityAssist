@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-pj2%sfc2q2m@=h5yq90rp)$91w^n59=9*z1@u5tb%fjr(naum4
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['https://abilityassist25.netlify.app/']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -86,7 +86,12 @@ DATABASES = {
     }
 }
 
-
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # SMTP server address
+EMAIL_PORT = 587  # SMTP server port (typically 587 for TLS)
+EMAIL_USE_TLS = True  # Set to True if your SMTP server requires TLS/SSL
+EMAIL_HOST_USER = 'abilityassistcompany@gmail.com'  # Your email address for sending emails
+EMAIL_HOST_PASSWORD = 'password123!@*'  # Your email account password
 
 
 # Password validation
