@@ -74,13 +74,17 @@ WSGI_APPLICATION = 'AbilityAssist.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-import firebase_admin
-from firebase_admin import credentials
 
-cred = credentials.Certificate("serviceAccountKey.json/")
-firebase_admin.initialize_app(cred)
-
-
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'kpfjzjpo',
+        'USER': 'kpfjzjpo',
+        'PASSWORD': 'lyMgD0YdTswnLFWEfx7M0yKr9fTvjX4W',
+        'HOST': 'flora.db.elephantsql.com',
+        'PORT': '5432',
+    }
+}
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'  # SMTP server address
