@@ -77,7 +77,7 @@ WSGI_APPLICATION = 'AbilityAssist.wsgi.application'
 import firebase_admin
 from firebase_admin import credentials
 
-cred = credentials.Certificate("\firebase")
+cred = credentials.Certificate("C:/Users/User/Documents/GitHub/AbilityAssist/firebase/")
 firebase_admin.initialize_app(cred)
 
 
