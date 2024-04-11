@@ -107,7 +107,7 @@ def contact(request):
 
         if not name or not email or not message:
             messages.error(request, 'Please fill in all fields.')
-            return redirect(reverse('contact'))
+            return redirect('contact')
 
         send_mail(
             'New message from AbilityAssist contact form',
@@ -121,3 +121,6 @@ def contact(request):
         return redirect(reverse('contact'))
 
     return render(request, 'contact.html')
+
+def saved_locations(request):
+    return render(request, 'saved_locations.html')
