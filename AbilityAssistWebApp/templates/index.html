@@ -128,8 +128,8 @@
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
-                <a class="navbar-brand" href="#"><img src="staticfiles/ability.png" alt="AbilityAssist Logo"
-                        height="30"></a>
+                <a class="navbar-brand" href="#"><img src="/staticfiles/abilityassist.png" alt="AbilityAssist Logo"
+                        height="45" width="50">AbilityAssist</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                     aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -137,13 +137,13 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav mr-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Home</a>
+                            <a class="nav-link" href="{% url 'index' %}">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">About</a>
+                            <a class="nav-link" href="{% url 'about' %}">About</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Contact</a>
+                            <a class="nav-link" href="{% url 'contact' %}">Contact</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="#">Help</a>
@@ -152,17 +152,25 @@
                     <div class="nav-item dropdown ml-auto">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Login to Volunteer Account
+                            {% if user.is_authenticated %}
+                                {{ user.get_full_name|default:user.username }}
+                            {% else %}
+                                Login to Volunteer Account
+                            {% endif %}
                             <i class="fas fa-user"></i>
                             <span class="username"></span>
                         </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="#">Edit/Delete Volunteer Profile</a>
-                            <a class="dropdown-item" href="#">Volunteer Assist History</a>
-                            <a class="dropdown-item" href="#">Assistive Resources</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#">Log In</a>
-                            <a class="dropdown-item" href="#">Log Out</a>
+                       <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            {% if user.is_authenticated %}
+                                <a class="dropdown-item" href="{% url 'edit_profile' %}">Edit/Delete Volunteer Profile</a>
+                                <a class="dropdown-item" href="{% url 'travel_history' %}">Volunteer Assist History</a>
+                                <a class="dropdown-item" href="{% url 'saved_locations' %}">Assistive Resources</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{% url 'logout' %}">Log Out</a>
+                            {% else %}
+                                <a class="dropdown-item" href="{% url 'login' %}">Log In</a>
+                                <a class="dropdown-item" href="{% url 'register' %}">Register</a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -171,8 +179,7 @@
     </header>
 
     <div class="container">
-        <h2>About AbilityAssist</h2>
-        <p>AbilityAssist is a company dedicated to providing assistance to people with disabilities. Our mission
+        <p>is a company dedicated to providing assistance to people with disabilities. Our mission
             is to make the world more accessible and inclusive for everyone. Whether it's finding accessible routes
             or providing support services, we are committed to empowering individuals with disabilities.</p>
 
@@ -303,6 +310,29 @@
             }
         }
     </script>
+    <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyA-R_0t_vcV4RdRbKdVs5wcRN_JYjFs_q8",
+    authDomain: "abilityassist-2bc5b.firebaseapp.com",
+    projectId: "abilityassist-2bc5b",
+    storageBucket: "abilityassist-2bc5b.appspot.com",
+    messagingSenderId: "825415708583",
+    appId: "1:825415708583:web:a2b870cf5a5a7706b65082",
+    measurementId: "G-X1ZJZ2F5ZK"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
 </body>
 
 </html>

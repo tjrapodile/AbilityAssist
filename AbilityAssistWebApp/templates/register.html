@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,91 +16,88 @@
     <style>
         /* Custom CSS */
         body {
-            font-family: 'Poppins', sans-serif; /* Exotic font */
-            background-color: #f0f0f0; /* Light gray background */
-            color: #333;
+            font-family: 'Poppins', sans-serif;
             margin: 0;
             padding: 0;
+            background-image: url('/staticfiles/login_registration_background.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
         }
 
         header {
             margin-bottom: 20px;
+            position: relative;
+            z-index: 1000;
         }
 
         footer {
-            background-color: #333;
-            color: #ffc107;
+            background-color: rgba(51, 51, 51, 0.9);
+            color: #fff;
             text-align: center;
             padding: 20px 0;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
+            position: relative;
+            z-index: 1000;
         }
 
         .navbar-brand,
         .nav-link {
-            font-family: 'Raleway', sans-serif; /* Exotic font */
-            color: #fff; /* White color */
+            font-family: 'Poppins', sans-serif;
+            color: #fff;
         }
 
         .navbar-dark .navbar-toggler-icon {
-            background-color: #fff; /* White color */
+            background-color: #fff;
         }
 
         .navbar-dark .navbar-nav .nav-link {
-            color: #fff; /* White color */
+            color: #fff;
         }
 
         .navbar-dark .navbar-nav .nav-link:hover {
-            color: #ffc107; /* Yellow color on hover */
+            color: #ffc107;
         }
 
         .dropdown-menu {
-            font-family: 'Raleway', sans-serif; /* Exotic font */
-            background-color: #333; /* Dark background */
+            font-family: 'Poppins', sans-serif;
+            background-color: #333;
         }
 
         .dropdown-item {
-            color: #fff; /* White color */
+            color: #fff;
         }
 
         .dropdown-item:hover {
-            background-color: #ffc107; /* Yellow color on hover */
+            background-color: #ffc107;
         }
 
         h1 {
-            font-family: 'Montserrat', sans-serif; /* Exotic font */
-            color: #333; /* Dark gray color */
+            font-family: 'Montserrat', sans-serif;
+            color: #333;
         }
 
         label {
-            font-family: 'Poppins', sans-serif; /* Exotic font */
-            color: #666; /* Light gray color */
-            margin-bottom: 0.5rem; /* Adjust space between label and input */
+            font-family: 'Poppins', sans-serif;
+            color: #495057;
+            margin-bottom: 0.5rem;
         }
 
         .form-control {
-            border-color: #ffc107; /* Yellow color for form input border */
+            border-radius: 0.5rem;
         }
 
         .btn-primary {
-            background-color: #ffc107; /* Yellow color for primary button */
-            border-color: #ffc107; /* Yellow color for primary button border */
+            background-color: #ffc107;
+            border-color: #ffc107;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            transition: background-color 0.3s ease;
         }
 
         .btn-primary:hover {
-            background-color: #e0a800; /* Darker yellow color on hover */
-            border-color: #e0a800; /* Darker yellow color on hover */
-        }
-
-        .btn-danger {
-            background-color: #dc3545; /* Red color for danger button */
-            border-color: #dc3545; /* Red color for danger button border */
-        }
-
-        .btn-danger:hover {
-            background-color: #c82333; /* Darker red color on hover */
-            border-color: #c82333; /* Darker red color on hover */
+            background-color: #e0a800;
+            border-color: #e0a800;
         }
 
         .user-icon {
@@ -107,121 +105,194 @@
         }
 
         .registration-form {
-            max-width: 400px; /* Set maximum width for the form */
-            margin: auto; /* Center the form horizontally */
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .mt-5 {
+            margin-top: 5rem;
+        }
+
+        .split-container {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            align-items: center;
+        }
+
+        .image-container {
+            width: 50%;
+            margin-right: 20px;
+        }
+
+        .image-container img {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .form-container {
+            width: 40%;
+            margin-bottom: 60px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group.has-error {
+        position: relative;
+        }
+
+        .form-group.has-error .form-control {
+            border-color: #f00; /* Red border color */
+        }
+
+        .form-group.has-error .error {
+            position: absolute;
+            bottom: -1.5em;
+            left: 0;
+            color: #f00; /* Red error message color */
+            font-size: 0.8em;
         }
     </style>
 </head>
+
 <body>
 
 <header>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'index' %}">AbilityAssist</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="#"><img src="/staticfiles/abilityassist.png" alt="AbilityAssist Logo"
+                        height="45" width="50">AbilityAssist</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                     aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'index' %}">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'about' %}">About</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'contact' %}">Contact</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Help</a>
-                    </li>
-                    <li class="nav-item dropdown">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'index' %}">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'about' %}">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'contact' %}">Contact</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Help</a>
+                        </li>
+                    </ul>
+                    <div class="nav-item dropdown ml-auto">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             {% if user.is_authenticated %}
-                                <i class="fas fa-user user-icon"></i>{{ user.username }}
+                                {{ user.get_full_name|default:user.username }}
                             {% else %}
-                                Login to your Account
+                                Login to Volunteer Account
                             {% endif %}
+                            <i class="fas fa-user"></i>
+                            <span class="username"></span>
                         </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                       <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                             {% if user.is_authenticated %}
-                                <a class="dropdown-item" href="{% url 'edit_profile' %}">Edit Profile</a>
-                                <a class="dropdown-item" href="{% url 'travel_history' %}">Check search history</a>
-                                <a class="dropdown-item" href="{% url 'saved_locations' %}">Saved Locations</a>
+                                <a class="dropdown-item" href="{% url 'edit_profile' %}">Edit/Delete Volunteer Profile</a>
+                                <a class="dropdown-item" href="{% url 'travel_history' %}">Volunteer Assist History</a>
+                                <a class="dropdown-item" href="{% url 'saved_locations' %}">Assistive Resources</a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="{% url 'logout' %}">Log Out</a>
                             {% else %}
-                                <a class="dropdown-item" href="{% url 'login' %}">Login</a>
+                                <a class="dropdown-item" href="{% url 'login' %}">Log In</a>
                                 <a class="dropdown-item" href="{% url 'register' %}">Register</a>
                             {% endif %}
                         </div>
-                    </li>
-                </ul>
+                    </div>
+                </div>
             </div>
-        </div>
-    </nav>
-</header>
+        </nav>
+    </header>
 
 <div class="container mt-5">
     <div class="row">
         <div class="col-md-12">
-            <h1>User Registration</h1>
-            {% if user.is_authenticated %}
-                <div class="alert alert-danger" role="alert">
-                    You are already logged in. Please <a href="{% url 'logout' %}" class="alert-link">logout</a> to register a new account.
-                </div>
-            {% else %}
-                <form method="post" class="registration-form" action="{% url 'register' %}">
-                    {% csrf_token %}
-                    {{ form.non_field_errors }}
-                    <div class="form-row">
-                        <div class="form-group col-md-6">
-                            {{ form.first_name.label_tag }}
-                            {{ form.first_name }}
-                            {{ form.first_name.errors }}
-                        </div>
-                        <div class="form-group col-md-6">
-                            {{ form.last_name.label_tag }}
-                            {{ form.last_name }}
-                            {{ form.last_name.errors }}
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group col-md-6">
-                            {{ form.email.label_tag }}
-                            {{ form.email }}
-                            {{ form.email.errors }}
-                        </div>
-                        <div class="form-group col-md-6">
-                            {{ form.password.label_tag }}
-                            {{ form.password }}
-                            {{ form.password.errors }}
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group col-md-6">
-                            {{ form.password2.label_tag }}
-                            {{ form.password2 }}
-                            {{ form.password2.errors }}
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Register</button>
-                </form>
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-danger" role="alert">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                {% endif %}
+            <div class="split-container">
+                <div class="image-container">
 
-            {% endif %}
+                </div>
+                <div class="form-container">
+                    <div class="registration-form container">
+                        <h2 class="text-center mb-4">User Registration</h2>
+                        {% if user.is_authenticated %}
+                            <div class="alert alert-danger" role="alert">
+                                You are already logged in. Please <a href="{% url 'logout' %}" class="alert-link">logout</a> to register a new account.
+                            </div>
+                        {% else %}
+                            <form method="post" action="{% url 'register' %}">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <label for="first_name">First Name</label>
+                                    <input type="text" class="form-control" id="first_name" name="first_name">
+                                    {% if form.first_name.errors %}
+                                    <div class="error-message alert alert-danger mt-3" role="alert">{{ form.first_name.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="last_name">Last Name</label>
+                                    <input type="text" class="form-control" id="last_name" name="last_name">
+                                    {% if form.last_name.errors %}
+                                    <div class="error-message alert alert-danger mt-3" role="alert">{{ form.last_name.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="phone">Phone Number</label>
+                                    <input type=tel class="form-control" id="phone" name="phone" required>
+                                    {% if form.phone.errors %}
+                                    <div class="error-message alert alert-danger mt-3" role="alert">{{ form.phone.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="email">Email</label>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                    {% if form.email.errors %}
+                                    <div class="error-message alert alert-danger mt-3" role="alert">{{ form.email.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="password">Password</label>
+                                    <input type="password" class="form-control" id="password" name="password">
+                                    {% if form.password.errors %}
+                                    <div class="error-message alert alert-danger mt-3" role="alert">{{ form.password.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="password2">Confirm Password</label>
+                                    <input type="password" class="form-control" id="password2" name="password2">
+                                    {% if form.password2.errors %}
+                                    <div class="error-message alert alert-danger mt-3" role="alert">{{ form.password2.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-block">Register</button>
+                            </form>
+                            {% if messages.success %}
+                                <div class="alert alert-danger mt-3" role="alert">
+                                    {{ messages }}
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
-
 
 <footer>
     <div class="container">
@@ -233,7 +304,43 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Function to highlight the error fields
+        function highlightErrorFields() {
+            var errorFields = document.querySelectorAll('.form-group.has-error');
+            errorFields.forEach(function (field) {
+                field.classList.add('highlight-error');
+            });
+        }
 
+        // Call the function when the page loads
+        highlightErrorFields();
+    });
+</script>
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyA-R_0t_vcV4RdRbKdVs5wcRN_JYjFs_q8",
+    authDomain: "abilityassist-2bc5b.firebaseapp.com",
+    projectId: "abilityassist-2bc5b",
+    storageBucket: "abilityassist-2bc5b.appspot.com",
+    messagingSenderId: "825415708583",
+    appId: "1:825415708583:web:a2b870cf5a5a7706b65082",
+    measurementId: "G-X1ZJZ2F5ZK"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
 </body>
-</html>
 
+</html>

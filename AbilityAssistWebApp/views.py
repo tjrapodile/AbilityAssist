@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout as auth_logout
 from .models import UserProfile, TravelHistory
-from .forms import CustomUserCreationForm, LoginForm
+from .forms import RegistrationForm, LoginForm
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.urls import reverse
@@ -14,31 +14,23 @@ def index(request):
 
 def register(request):
     if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
+        form = RegistrationForm(request.POST)
         if form.is_valid():
-            # Create a new User instance
-            user = User.objects.create_user(
-                username=form.cleaned_data['email'],
-                email=form.cleaned_data['email'],
-                password=form.cleaned_data['password']
-            )
-
-            # Create a new UserProfile instance and associate it with the user
+            user = form.save()
+            # Save UserProfile
             UserProfile.objects.create(
                 user=user,
-                first_name=form.cleaned_data['first_name'],
-                last_name=form.cleaned_data['last_name'],
-                email=form.cleaned_data['email']
+                phone=form.cleaned_data['phone']
             )
-
-            # You can handle user authentication here if needed
-            user = authenticate(request, username=user.username, password=form.cleaned_data['password'])
-            if user is not None:
-                login(request, user)
-
-            return redirect('index')
+            messages.success(request, 'Account created successfully. You can now log in.')
+            return redirect('login')  # Redirect to login page after successful registration
+        else:
+            # Form is invalid, display errors
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field.capitalize()}: {error}')
     else:
-        form = CustomUserCreationForm()
+        form = RegistrationForm()
     return render(request, 'register.html', {'form': form})
 
 
