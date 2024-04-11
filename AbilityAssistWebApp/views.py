@@ -23,7 +23,7 @@ def register(request):
                 phone=form.cleaned_data['phone']
             )
             messages.success(request, 'Account created successfully. You can now log in.')
-            return redirect('login')  # Redirect to login page after successful registration
+            return render('index.html')  # Redirect to login page after successful registration
         else:
             # Form is invalid, display errors
             for field, errors in form.errors.items():
