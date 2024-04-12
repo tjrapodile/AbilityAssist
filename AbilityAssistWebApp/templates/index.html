@@ -363,87 +363,60 @@
                 center: tutSouthCampus, // Center the map on TUT main campus
                 zoom: 16,
                 restriction: {
-                latLngBounds: tutSouthCampusBounds,
-                strictBounds: true
-                },
+                    latLngBounds: tutSouthCampusBounds,
+                    strictBounds: true
+                    },
             gestureHandling: 'cooperative' // Allow map panning within bounds
             });
-            // Function to get the user's current location
-            function getCurrentLocation() {
-                // Check if the browser supports geolocation
-                if (navigator.geolocation) {
-                    // Use the getCurrentPosition method to get the user's location
-                    navigator.geolocation.getCurrentPosition(
-                        // Success callback function
-                        function (position) {
-                            // Get the latitude and longitude from the position object
-                            const latitude = position.coords.latitude;
-                            const longitude = position.coords.longitude;
+            // Get user's current location
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        // Retrieve user's current latitude and longitude
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
 
-                            // Log the coordinates to the console
-                            console.log('Latitude:', latitude);
-                            console.log('Longitude:', longitude);
+                        // Define the user's location as a LatLng object
+                        var userLocation = { lat: latitude, lng: longitude };
 
-<<<<<<< Updated upstream
-                    // Add marker for user's current location
-                    var marker = new google.maps.Marker({
-                        position: userLocation,
-                        map: map,
-                        title: 'Your Location'
-                    });
+                        // Create a marker at the user's location
+                        var marker = new google.maps.Marker({
+                            position: userLocation,
+                            map: map,
+                            title: 'Your Location'
+                        });
 
-                    // Center the map on the user's location
-                    map.setCenter(userLocation);
-                }, function (error) {
-                    console.error('Error: The Geolocation service failed:', error);
-                }, {
-                    enableHighAccuracy: true, // Request more accurate position
-                    maximumAge: 5000, // Cache location for 5 seconds
-                    timeout: 10000 // Wait up to 10 seconds for location response
-                });
+                        // Center the map on the user's location
+                        map.setCenter(userLocation);
+                    },
+                    function(error) {
+                        console.error('Error: The Geolocation service failed:', error);
+                    },
+                    {
+                        enableHighAccuracy: true, // Request high accuracy for location
+                        maximumAge: 5000, // Cache location for 5 seconds
+                        timeout: 10000 // Wait up to 10 seconds for location response
+                    }
+                );
             } else {
                 console.error('Error: Your browser doesn\'t support geolocation.');
-=======
-                            // Perform any additional actions with the coordinates
-                            // For example, display them on the webpage or pass them to a map API
-                            displayLocationOnMap(latitude, longitude);
-                        },
-                        // Error callback function
-                        function (error) {
-                            console.error('Error getting location:', error.message);
-                        }
-                    );
-                } else {
-                    // Geolocation is not supported by the browser
-                    console.error('Geolocation is not supported by this browser.');
-                }
->>>>>>> Stashed changes
             }
 
-            // Example function to display location on a map (implementation not shown)
-            function displayLocationOnMap(latitude, longitude) {
-                // Implement this function to display the coordinates on a map
-                // This could involve using a mapping API such as Google Maps or OpenStreetMap
-                console.log('Displaying location on map...');
-            }
-
-            // Call the function to get the current location
-            getCurrentLocation();
-
+            // Set up autocomplete for the destination input
             var input = document.getElementById('destinationInput');
             var autocomplete = new google.maps.places.Autocomplete(input);
             autocomplete.bindTo('bounds', map);
 
+            // Set up markers for predefined locations
             setMarkers(map);
         }
+
+
 
         // Data for the markers consisting of a name, a LatLng and a zIndex for the
         // order in which these markers should display on top of each other.
         const beaches = [
-<<<<<<< Updated upstream
-=======
           ["Student town resident admin", -25.54345, 28.09544, 14],
->>>>>>> Stashed changes
           ["Main gate", -25.54396, 28.09668, 11],
           ["Small gate",  -25.54062, 28.09766, 10],
           ["Library", -25.5403, 28.0954, 9],
