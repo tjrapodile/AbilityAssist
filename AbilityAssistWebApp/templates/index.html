@@ -105,31 +105,108 @@
 
         .split-container {
             display: flex;
-            flex-direction: row;
+            flex-direction: column;
             width: 100%;
         }
 
         #map-container {
-            width: 60%;
+            width: 100%;
             height: 400px;
             overflow: hidden;
             border: 1px solid #ccc;
             border-radius: 5px;
-            margin-right: 20px;
+            margin-bottom: 20px;
         }
 
         .form-container {
-            width: 40%;
+            width: 100%;
+            margin-bottom: 20px;
         }
+
+        .company-info {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            color: #333;
+        }
+
+        footer {
+            background-color: #333;
+            color: #ffc107;
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        @media (min-width: 768px) {
+            .split-container {
+                flex-direction: row;
+            }
+
+            #map-container {
+                width: 60%;
+                margin-right: 20px;
+            }
+
+            .form-container {
+                width: 40%;
+            }
+        }
+
+        .chat-button {
+            margin-top: 10px;
+            background-color: #007bff;
+            border-color: #007bff;
+            color: #fff;
+            width:100%;
+        }
+
+        .chat-button:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .emergency-button {
+            margin-top: 10px;
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: #fff;
+            width:100%;
+        }
+
+        .emergency-button:hover {
+            background-color: #c82333;
+            border-color: #c82333;
+        }
+
+        .button-container {
+            width: 100%; /* Buttons take up 50% width */
+            margin-top: 20px;
+        }
+
+        /* Additional styling for buttons */
+        .chat-button,
+        .emergency-button {
+            height: 50%; /* Each button takes up 50% of the height */
+            border-radius: 0;
+        }
+
+        .chat-button:hover,
+        .emergency-button:hover {
+            border-radius: 0;
+        }
+
     </style>
 </head>
+
 
 <body>
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
-                <a class="navbar-brand" href="#"><img src="/staticfiles/abilityassist.png" alt="AbilityAssist Logo"
-                        height="45" width="50">AbilityAssist</a>
+                <a class="navbar-brand" href="{% url 'index' %}"><img src="/staticfiles/abilityassist.png" alt="AbilityAssist Logo"
+                        height="45" width="50">Ability Assist</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                     aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -179,10 +256,6 @@
     </header>
 
     <div class="container">
-        <p>is a company dedicated to providing assistance to people with disabilities. Our mission
-            is to make the world more accessible and inclusive for everyone. Whether it's finding accessible routes
-            or providing support services, we are committed to empowering individuals with disabilities.</p>
-
         <div class="split-container">
             <div id="map-container"></div>
             <div class="form-container">
@@ -191,14 +264,37 @@
                         <label for="destinationInput">Choose Destination:</label>
                         <select class="form-control" id="destinationInput">
                             <option value="">Select a destination</option>
-                            <option value="cafe">Cafeteria</option>
+                            <option value="cafeteria">Cafeteria</option>
                             <option value="library">Library</option>
+                            <option value="building10">Building 10</option>
+                            <option value="building14">Building 14</option>
+                            <option value="gencor_hall">Gencor Hall</option>
+                            <option value="gym">Gymnasium</option>
+                            <option value="student_centre">Student Centre</option>
+                            <option value="main_gate">Main Gate</option>
+                            <option value="small_gate">Small Gate</option>
+                            <option value="w_res">W Residence </option>
+                            <option value="m_res">M Residence </option>
                             <!-- Add more options for other landmarks -->
                         </select>
                     </div>
                     <button type="submit" class="btn btn-primary btn-block">Calculate Distance</button>
                 </form>
+                <!-- New buttons -->
+                <div class="button-container d-flex flex-row justify-content-between h-100">
+                    <button class="btn btn-primary chat-button" onclick="showChatOptions()">
+                        <i class="fas fa-microphone-alt"></i> <!-- Icon for text to speech -->
+                    </button>
+                    <button class="btn btn-danger emergency-button">
+                        <i class="fas fa-exclamation-triangle"></i> <!-- Icon for emergency contact -->
+                    </button>
+                </div>
             </div>
+        </div>
+
+        <div class="company-info">
+            <h2>About AbilityAssist</h2>
+            <p>AbilityAssist is a company dedicated to providing assistance to people with disabilities. Our mission is to make the world more accessible and inclusive for everyone. Whether it's finding accessible routes or providing support services, we are committed to empowering individuals with disabilities.</p>
         </div>
 
         <div id="distanceResult" class="scroll-container mt-3"></div>

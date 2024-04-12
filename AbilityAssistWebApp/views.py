@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
+
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout as auth_logout
@@ -23,7 +23,7 @@ def register(request):
                 phone=form.cleaned_data['phone']
             )
             messages.success(request, 'Account created successfully. You can now log in.')
-            return render('index.html')  # Redirect to login page after successful registration
+            return redirect('login')  # Redirect to login page after successful registration
         else:
             # Form is invalid, display errors
             for field, errors in form.errors.items():
@@ -69,7 +69,7 @@ def edit_profile(request):
         user_profile.save()
 
         messages.success(request, 'Your profile has been updated successfully.')
-        return redirect('index')
+        return redirect('login')
 
     else:
         messages.error(request, 'Your profile update experienced an error.')
