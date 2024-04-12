@@ -317,15 +317,15 @@
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAWgNkwf11_tis-7MTs4dI-Dvm-e5EX-MA&callback=initMap&libraries=places"
         async defer></script>
 
-    <script>
+     <script>
         var map;
 
         function initMap() {
             // Coordinates for Tshwane University of Technology main campus in Pretoria West
-            var tutMainCampus = { lat: -25.747478, lng: 28.219101 };
+            var tutSouthCampus = { lat: -25.54055, lng: 28.095 };
 
             map = new google.maps.Map(document.getElementById('map-container'), {
-                center: tutMainCampus, // Center the map on TUT main campus
+                center: tutSouthCampus, // Center the map on TUT main campus
                 zoom: 16
             });
 
@@ -356,6 +356,64 @@
             var input = document.getElementById('destinationInput');
             var autocomplete = new google.maps.places.Autocomplete(input);
             autocomplete.bindTo('bounds', map);
+
+            setMarkers(map);
+        }
+
+        // Data for the markers consisting of a name, a LatLng and a zIndex for the
+        // order in which these markers should display on top of each other.
+        const beaches = [
+          ["Student town resident admin", -25.54345, 28.09544, 14],
+          ["FNB ATM", -25.5413, 28.09568, 13],
+          ["Absa ATM", -25.541454, 28.0951, 12],
+          ["Main gate", -25.54396, 28.09668, 11],
+          ["Small gate",  -25.54062, 28.09766, 10],
+          ["Library", -25.5403, 28.0954, 9],
+          ["Building 13", -25.53922, 28.0962, 8],
+          ["One stop Post/Under-graduates", -25.54055, 28.09525, 7],
+          ["I-Center", -25.5403, 28.09558, 6],
+          ["Building 14", -25.538888, 28.09612, 5],
+          ["Gymnasium", -25.5413, 28.09568, 4],
+          ["Student centre", -25.541454, 28.0951, 3],
+          ["Men & Female Resident admin", -25.54025, 28.09490, 2],
+          ["Financial Aid office", -25.54055, 28.0957, 1],
+        ];
+
+        function setMarkers(map) {
+          // Adds markers to the map.
+          // Marker sizes are expressed as a Size of X,Y where the origin of the image
+          // (0,0) is located in the top left of the image.
+          // Origins, anchor positions and coordinates of the marker increase in the X
+          // direction to the right and in the Y direction down.
+          const image = {
+            url: "https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png",
+            // This marker is 20 pixels wide by 32 pixels high.
+            size: new google.maps.Size(20, 32),
+            // The origin for this image is (0, 0).
+            origin: new google.maps.Point(0, 0),
+            // The anchor for this image is the base of the flagpole at (0, 32).
+            anchor: new google.maps.Point(0, 32),
+          };
+          // Shapes define the clickable region of the icon. The type defines an HTML
+          // <area> element 'poly' which traces out a polygon as a series of X,Y points.
+          // The final coordinate closes the poly by connecting to the first coordinate.
+          const shape = {
+            coords: [1, 1, 1, 20, 18, 20, 18, 1],
+            type: "poly",
+          };
+
+          for (let i = 0; i < beaches.length; i++) {
+            const beach = beaches[i];
+
+            new google.maps.Marker({
+              position: { lat: beach[1], lng: beach[2] },
+              map,
+              icon: image,
+              shape: shape,
+              title: beach[0],
+              zIndex: beach[3],
+            });
+          }
         }
 
         document.getElementById('destinationForm').addEventListener('submit', function (event) {
