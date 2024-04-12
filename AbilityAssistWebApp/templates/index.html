@@ -265,17 +265,16 @@
                         <label for="destinationInput">Choose Destination:</label>
                         <select class="form-control" id="destinationInput">
                             <option value="">Select a destination</option>
-                            <option value="cafeteria">Cafeteria</option>
-                            <option value="library">Library</option>
-                            <option value="building10">Building 10</option>
-                            <option value="building14">Building 14</option>
-                            <option value="gencor_hall">Gencor Hall</option>
-                            <option value="gym">Gymnasium</option>
-                            <option value="student_centre">Student Centre</option>
-                            <option value="main_gate">Main Gate</option>
-                            <option value="small_gate">Small Gate</option>
-                            <option value="w_res">W Residence </option>
-                            <option value="m_res">M Residence </option>
+                            <option value="Main gate">Main Gate</option>
+                            <option value="Small gate">Small Gate</option>
+                            <option value="Library">Library</option>
+                            <option value="Building 13">Building 13</option>
+                            <option value="One stop Post/Under-graduates">One-Stop Building</option>
+                            <option value="I-centre">Gymnasium</option>
+                            <option value="Building 14">Building 14</option>
+                            <option value="Student centre">Student Centre</option>
+                            <option value="Men & Femaile Resident admin">Res Admin Building</option>
+                            <option value="Finanicial Aid office">Financial Aid Office</option>
                             <!-- Add more options for other landmarks -->
                         </select>
                     </div>
@@ -346,8 +345,12 @@
 
                     // Center the map on the user's location
                     map.setCenter(userLocation);
-                }, function () {
-                    console.error('Error: The Geolocation service failed.');
+                }, function (error) {
+                    console.error('Error: The Geolocation service failed:', error);
+                }, {
+                    enableHighAccuracy: true, // Request more accurate position
+                    maximumAge: 5000, // Cache location for 5 seconds
+                    timeout: 10000 // Wait up to 10 seconds for location response
                 });
             } else {
                 console.error('Error: Your browser doesn\'t support geolocation.');
@@ -363,9 +366,6 @@
         // Data for the markers consisting of a name, a LatLng and a zIndex for the
         // order in which these markers should display on top of each other.
         const beaches = [
-          ["Student town resident admin", -25.54345, 28.09544, 14],
-          ["FNB ATM", -25.5413, 28.09568, 13],
-          ["Absa ATM", -25.541454, 28.0951, 12],
           ["Main gate", -25.54396, 28.09668, 11],
           ["Small gate",  -25.54062, 28.09766, 10],
           ["Library", -25.5403, 28.0954, 9],
