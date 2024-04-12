@@ -182,21 +182,47 @@
         }
 
         .button-container {
-            width: 100%; /* Buttons take up 50% width */
             margin-top: 10px;
+            display:flex;
+            flex-direction: column;
+            align items: center;
+            height: 250px;
         }
 
         /* Additional styling for buttons */
         .chat-button,
         .emergency-button {
-            height: 50%; /* Each button takes up 50% of the height */
-            border-radius: 0;
+            height: 100%; /* Each button takes up 50% of the height */
+            margin-bootm: 10px;
         }
 
         .chat-button:hover,
         .emergency-button:hover {
             border-radius: 0;
         }
+
+        .chat-button span,
+        .emergency-button span {
+            display: block;
+        }
+
+        .audio-indicator {
+        display: none; /* Initially hidden */
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background-color: #007bff;
+        color: #fff;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 40px;
+    }
+
+    .audio-indicator.active {
+        display: block; /* Displayed when active */
+    }
 
     </style>
 </head>
@@ -281,13 +307,17 @@
                     <button type="submit" class="btn btn-primary btn-block">Calculate Distance</button>
                 </form>
                 <!-- New buttons -->
-                <div class="button-container d-flex flex-row justify-content-between h-100">
-                    <button class="btn btn-primary chat-button" onclick="showChatOptions()">
-                        <i class="fas fa-microphone-alt"></i> <!-- Icon for text to speech -->
+                <div class="button-container d-flex flex-column align-items-center">
+                    <button class="btn btn-primary chat-button" onclick="startVoiceRecognition()">
+                        <i class="fas fa-microphone-alt"></i>
+                        <span>Chat Instead</span> <!-- Added text -->
+                        <div class="audio-indicator" id="audioIndicator">🔊</div>
                     </button>
                     <button class="btn btn-danger emergency-button">
-                        <i class="fas fa-exclamation-triangle"></i> <!-- Icon for emergency contact -->
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Contact a Volunteer</span> <!-- Added text -->
                     </button>
+                </div>
                 </div>
             </div>
         </div>
@@ -318,6 +348,12 @@
 
      <script>
         var map;
+        var tutSouthCampusBounds = {
+            north: -25.5372,
+            south: -25.5427,
+            east: 28.0983,
+            west: 28.0929
+        };
 
         function initMap() {
             // Coordinates for Tshwane University of Technology main campus in Pretoria West
@@ -325,7 +361,12 @@
 
             map = new google.maps.Map(document.getElementById('map-container'), {
                 center: tutSouthCampus, // Center the map on TUT main campus
-                zoom: 16
+                zoom: 16,
+                restriction: {
+                latLngBounds: tutSouthCampusBounds,
+                strictBounds: true
+                },
+            gestureHandling: 'cooperative' // Allow map panning within bounds
             });
 
             // Get user's location using Geolocation API
@@ -465,6 +506,53 @@
             }
         }
     </script>
+
+    <script>
+    var recognition;
+    var audioIndicator = document.getElementById('audioIndicator');
+
+    function startVoiceRecognition() {
+        audioIndicator.classList.add('active'); // Show audio indicator
+
+        speak("Hello! Please choose a destination by speaking the corresponding number.");
+        setTimeout(function () {
+            if ('webkitSpeechRecognition' in window) {
+                recognition = new webkitSpeechRecognition();
+                recognition.lang = 'en-US';
+                recognition.start();
+                recognition.onresult = function (event) {
+                    var transcript = event.results[0][0].transcript;
+                    speak("You said: " + transcript); // Speak the recognized text
+                    var destinationIndex = parseInt(transcript) - 1;
+                    var options = document.getElementById('destinationInput').options;
+                    if (destinationIndex >= 0 && destinationIndex < options.length) {
+                        options[destinationIndex].selected = true;
+                        speak("Selected destination: " + options[destinationIndex].text);
+                    }
+                };
+                recognition.onend = function () {
+                    audioIndicator.classList.remove('active'); // Hide audio indicator after speech ends
+                };
+                setTimeout(function () {
+                    recognition.stop();
+                }, 7000); // Stop recognition after 5 seconds
+            } else {
+                alert("Speech recognition not supported in this browser!");
+            }
+        }, 3000); // Wait 3 seconds before starting recognition after greeting
+    }
+
+    function speak(message) {
+        var speechSynthesis = window.speechSynthesis;
+        var speechMessage = new SpeechSynthesisUtterance(message);
+        speechSynthesis.speak(speechMessage);
+    }
+    </script>
+
+
+
+
+
 
 </body>
 
