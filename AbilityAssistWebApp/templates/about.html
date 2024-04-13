@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,85 +16,153 @@
     <style>
         /* Custom CSS */
         body {
-            font-family: 'Poppins', sans-serif; /* Exotic font */
-            background-color: #f0f0f0; /* Light gray background */
+            font-family: 'Poppins', sans-serif;
+            background-color: #e7f1f7;
             color: #333;
             margin: 0;
             padding: 0;
+            font-size: 1.2rem;
         }
 
         header {
             margin-bottom: 20px;
+            position: relative;
+            z-index: 1000;
         }
 
         footer {
-            background-color: #333;
-            color: #ffc107;
+            background-color: #343a40;
+            color: #fff;
             text-align: center;
             padding: 20px 0;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
+            position: relative;
+            z-index: 1000;
         }
 
         .navbar-brand,
         .nav-link {
-            font-family: 'Raleway', sans-serif; /* Exotic font */
-            color: #fff; /* White color */
+            font-family: 'Poppins', sans-serif;
+            color: #fff;
         }
 
         .navbar-dark .navbar-toggler-icon {
-            background-color: #fff; /* White color */
+            background-color: #fff;
         }
 
         .navbar-dark .navbar-nav .nav-link {
-            color: #fff; /* White color */
+            color: #fff;
         }
 
         .navbar-dark .navbar-nav .nav-link:hover {
-            color: #ffc107; /* Yellow color on hover */
+            color: #ffc107;
         }
 
         .dropdown-menu {
-            font-family: 'Raleway', sans-serif; /* Exotic font */
-            background-color: #333; /* Dark background */
+            font-family: 'Poppins', sans-serif;
+            background-color: #333;
         }
 
         .dropdown-item {
-            color: #fff; /* White color */
+            color: #fff;
         }
 
         .dropdown-item:hover {
-            background-color: #ffc107; /* Yellow color on hover */
+            background-color: #ffc107;
         }
 
         h1 {
-            font-family: 'Montserrat', sans-serif; /* Exotic font */
-            color: #333; /* Dark gray color */
+            font-family: 'Montserrat', sans-serif;
+            color: #343a40;
         }
 
         p {
-            font-family: 'Poppins', sans-serif; /* Exotic font */
-            color: #666; /* Light gray color */
+            font-family: 'Poppins', sans-serif;
+            color: #666;
+
         }
 
         .about-content {
             margin-top: 50px;
+            padding: 0 15px; /* Added padding for better mobile display */
         }
+
+        .feature {
+            margin-top: 30px;
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+
+        .feature h2 {
+            color: #ffc107;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .feature p {
+            color: #666;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .features {
+            display: flex;
+            flex-wrap: wrap; /* Added flex-wrap to handle small screens */
+            justify-content: space-between;
+            margin-top: 30px;
+            padding: 0 15px; /* Added padding for better mobile display */
+        }
+
+        /* Added style for each feature */
+        .feature.left {
+            text-align: center;
+            margin-bottom: 20px; /* Added bottom margin for spacing */
+        }
+
+        .feature.center {
+            text-align: center;
+            margin-bottom: 20px; /* Added bottom margin for spacing */
+        }
+
+        .feature.right {
+            text-align: center;
+            margin-bottom: 20px; /* Added bottom margin for spacing */
+        }
+
+        /* Adjustments for smaller screens */
+        @media (max-width: 768px) {
+            .about-content {
+                margin-top: 20px;
+            }
+
+            .feature {
+                padding: 15px;
+                margin-bottom: 20px; /* Added bottom margin for spacing */
+            }
+
+            .navbar-brand,
+            .nav-link {
+                font-size: 18px;
+            }
+        }
+
     </style>
 </head>
+
 <body>
 
 <header>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'index' %}">AbilityAssist</a>
+            <a class="navbar-brand" href="{% url 'index' %}"><img src="/staticfiles/abilityassist.png" alt="AbilityAssist Logo" height="45" width="50">AbilityAssist</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                     aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-                <ul class="navbar-nav">
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mr-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'index' %}">Home</a>
                     </li>
@@ -106,29 +175,29 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#">Help</a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            {% if user.is_authenticated %}
-                                <i class="fas fa-user user-icon"></i>{{ user.username }}
-                            {% else %}
-                                Login to your Account
-                            {% endif %}
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            {% if user.is_authenticated %}
-                                <a class="dropdown-item" href="{% url 'edit_profile' %}">Edit Profile</a>
-                                <a class="dropdown-item" href="{% url 'travel_history' %}">Check search history</a>
-                                <a class="dropdown-item" href="{% url 'saved_locations' %}">Saved Locations</a>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="{% url 'logout' %}">Log Out</a>
-                            {% else %}
-                                <a class="dropdown-item" href="{% url 'login' %}">Login</a>
-                                <a class="dropdown-item" href="{% url 'register' %}">Register</a>
-                            {% endif %}
-                        </div>
-                    </li>
                 </ul>
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        {% if user.is_authenticated %}
+                        <i class="fas fa-user user-icon"></i>{{ user.username }}
+                        {% else %}
+                        Login to your Account
+                        {% endif %}
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        {% if user.is_authenticated %}
+                        <a class="dropdown-item" href="{% url 'edit_profile' %}">Edit Profile</a>
+                        <a class="dropdown-item" href="{% url 'travel_history' %}">Check search history</a>
+                        <a class="dropdown-item" href="{% url 'saved_locations' %}">Saved Locations</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{% url 'logout' %}">Log Out</a>
+                        {% else %}
+                        <a class="dropdown-item" href="{% url 'login' %}">Login</a>
+                        <a class="dropdown-item" href="{% url 'register' %}">Register</a>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
@@ -138,8 +207,8 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="about-content">
-                <h1>About AbilityAssist</h1>
-                <p>AbilityAssist is a company dedicated to providing assistance to people with disabilities. Our mission is to make the world more accessible and inclusive for everyone. Whether it's finding accessible routes or providing support services, we are committed to empowering individuals with disabilities.</p>
+                <h1 class="about-heading">About AbilityAssist</h1>
+                <p>The objective of AbilityAssist is to provide comprehensive assistance to individuals living with visual impairment at Tshwane University of Technology South Campus. We aim to empower users by employing cutting-edge sound detection technology, obstacle identification features, and voice-over assistance to guide them seamlessly throughout the campus. Additionally, AbilityAssist calculates distances for accurate arrival times to destinations, ensuring efficient navigation for users.</p>
                 <p>We believe that everyone, regardless of their abilities, should have equal access to opportunities and resources. That's why we work tirelessly to develop innovative solutions that improve the lives of people with disabilities.</p>
                 <p>With a team of dedicated professionals and experts in accessibility, we strive to create a more inclusive society where everyone can thrive and reach their full potential.</p>
             </div>
@@ -147,11 +216,34 @@
     </div>
 </div>
 
+<!-- Additional Features Section -->
+<div class="container additional-features">
+    <div class="row justify-content-center">
+       <div class="col-md-8">
+            <div class="features">
+                <div class="feature left">
+                    <h2>Sound Detection</h2>
+                    <p>AbilityAssist utilizes cutting-edge sound detection technology to help users navigate the campus safely.</p>
+                </div>
+                <div class="feature center">
+                    <h2>Distances </h2>
+                    <p>We calculate distances for accurate arrival times to destinations, ensuring efficient navigation for users.</p>
+                </div>
+                <div class="feature right">
+                    <h2>Voice-Over Assistance</h2>
+                    <p>Our voice-over assistance feature provides real-time guidance and instructions to users, enhancing their navigation experience.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <footer>
     <div class="container">
-        <p>&copy; 2024 AbilityAssist</p>
+        <p style="font-size: 14px;">&copy; 2024 AbilityAssist</p>
     </div>
 </footer>
+
 
 <!-- Bootstrap JS -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -159,4 +251,5 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 </body>
+
 </html>

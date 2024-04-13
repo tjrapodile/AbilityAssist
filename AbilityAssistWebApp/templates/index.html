@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome to AbilityAssist</title>
+    <script src="/staticfiles/leon.js' "></script>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <!-- Font Awesome -->
@@ -15,24 +16,34 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <style>
         /* Custom CSS */
+        /* Custom CSS */
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #f0f0f0;
+            background-color: #e7f1f7;
             color: #333;
             margin: 0;
             padding: 0;
+            font-size: 1.2rem;
+        }
+
+        header {
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1000;
         }
 
         footer {
-            background-color: #333;
-            color: #ffc107;
+            background-color: #343a40;
+            color: #fff;
             text-align: center;
             padding: 20px 0;
+            position: relative;
+            z-index: 1000;
         }
 
         .navbar-brand,
         .nav-link {
-            font-family: 'Raleway', sans-serif;
+            font-family: 'Poppins', sans-serif;
             color: #fff;
         }
 
@@ -49,7 +60,7 @@
         }
 
         .dropdown-menu {
-            font-family: 'Raleway', sans-serif;
+            font-family: 'Poppins', sans-serif;
             background-color: #333;
         }
 
@@ -109,6 +120,10 @@
             width: 100%;
         }
 
+        #audioIndicator {
+            display: none; /* Hide initially */
+        }
+
         #map-container {
             width: 100%;
             height: 400px;
@@ -152,40 +167,35 @@
             .form-container {
                 width: 40%;
             }
-
         }
 
-        .chat-button {
+        .chat-button{
             margin-top: 10px;
             background-color: #007bff;
             border-color: #007bff;
             color: #fff;
-            width:100%;
-        }
-
-        .chat-button:hover {
-            background-color: #0056b3;
-            border-color: #0056b3;
+            width: 100%;
         }
 
         .emergency-button {
             margin-top: 10px;
-            background-color: #dc3545;
-            border-color: #dc3545;
+            background-color: red;
+            border-color: #007bff;
             color: #fff;
-            width:100%;
+            width: 100%;
         }
 
+        .chat-button:hover,
         .emergency-button:hover {
-            background-color: #c82333;
-            border-color: #c82333;
+            background-color: #0056b3;
+            border-color: #0056b3;
         }
 
         .button-container {
             margin-top: 10px;
-            display:flex;
+            display: flex;
             flex-direction: column;
-            align items: center;
+            align-items: center;
             height: 250px;
         }
 
@@ -193,7 +203,7 @@
         .chat-button,
         .emergency-button {
             height: 100%; /* Each button takes up 50% of the height */
-            margin-bootm: 10px;
+            margin-bottom: 10px;
         }
 
         .chat-button:hover,
@@ -207,23 +217,38 @@
         }
 
         .audio-indicator {
-        display: none; /* Initially hidden */
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        background-color: #007bff;
-        color: #fff;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        text-align: center;
-        line-height: 40px;
-    }
+            display: none; /* Initially hidden */
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #007bff;
+            color: #fff;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+        }
 
-    .audio-indicator.active {
-        display: block; /* Displayed when active */
-    }
+        .audio-indicator.active {
+            display: block; /* Displayed when active */
+        }
 
+        /* Updated styles for dropdown menu */
+        .dropdown-menu {
+            font-family: 'Poppins', sans-serif;
+            background-color: #343a40;
+            border: none;
+        }
+
+        .dropdown-item {
+            color: #ffc107;
+        }
+
+        .dropdown-item:hover {
+            background-color: #343a40;
+            color: #fff;
+        }
     </style>
 </head>
 
@@ -284,100 +309,95 @@
 
     <div class="container">
         <div class="split-container">
-            <div id="map-container"></div>
+            <div id="map-container">
+
+            </div>
             <div class="form-container">
                 <form id="destinationForm">
                     <div class="form-group">
                         <label for="destinationInput">Choose Destination:</label>
-                        <select class="form-control" id="destinationInput">
+                        <select class="form-control" id="destinationInput" name="destination">
                             <option value="">Select a destination</option>
-                            <option value="Main gate">Main Gate</option>
-                            <option value="Small gate">Small Gate</option>
-                            <option value="Library">Library</option>
-                            <option value="Building 13">Building 13</option>
-                            <option value="One stop Post/Under-graduates">One-Stop Building</option>
-                            <option value="I-centre">Gymnasium</option>
-                            <option value="Building 14">Building 14</option>
-                            <option value="Student centre">Student Centre</option>
-                            <option value="Men & Femaile Resident admin">Res Admin Building</option>
-                            <option value="Finanicial Aid office">Financial Aid Office</option>
-                            <!-- Add more options for other landmarks -->
+                            <option value="5G6CF34W+CM Soshanguve, South Africa">Main Gate</option>
+                            <option value="5G6CF35X+Q3 Soshanguve, South Africa">Small Gate</option>
+                            <option value="5G6CF35W+V5 Soshanguve,  South Africa">Library</option>
+                            <option value="5G6CF36W+8F Soshanguve, South Africa">Building 13</option>
+                            <option value="F35W+Q3 Soshanguve, South Africa">One-Stop Building</option>
+                            <option value="F35V+VX Soshanguve, South Africa">M&W Res admin</option>
+                            <option value="5G6CF35W+Q7 Soshanguve, South Africa">Financial Aid Office</option>
+                            <option value="5G6CF35W+V6 Soshanguve, South Africa">I-Center</option>
+                            <option value="5G6CF35W+F7 Soshanguve, South Africa">Gymnasium</option>
+                            <option value="5G6CF34W+J5 Soshanguve, South Africa">Student town resident admin</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-block">Calculate Distance</button>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Calculate Route</button>
+                    </div>
                 </form>
-                <!-- New buttons -->
-                <div class="button-container d-flex flex-column align-items-center">
-                    <button class="btn btn-primary chat-button" onclick="startVoiceRecognition()">
-                        <i class="fas fa-microphone-alt"></i>
-                        <span>Chat Instead</span> <!-- Added text -->
-                        <div class="audio-indicator" id="audioIndicator">🔊</div>
+
+                <div id="distanceResult"></div>
+                <div class="button-container">
+                    <button class="chat-button" onclick="startChat()">
+                        <span class="fas fa-comment-dots"></span>
+                        Chat
                     </button>
-                    <button class="btn btn-danger emergency-button">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <span>Contact a Volunteer</span> <!-- Added text -->
+                    <button class="emergency-button" onclick="startEmergency()">
+                        <span class="fas fa-exclamation-circle"></span>
+                        Emergency
                     </button>
-                </div>
                 </div>
             </div>
         </div>
 
         <div class="company-info">
-            <h2>About AbilityAssist</h2>
-            <p>AbilityAssist is a company dedicated to providing assistance to people with disabilities. Our mission is to make the world more accessible and inclusive for everyone. Whether it's finding accessible routes or providing support services, we are committed to empowering individuals with disabilities.</p>
+            <h2>Welcome to AbilityAssist</h2>
+            <p>At AbilityAssist, we strive to create a more inclusive world for everyone. Let us know how we can help you
+                or your loved ones today.</p>
         </div>
 
-        <div id="distanceResult" class="scroll-container mt-3"></div>
+        <footer>
+            <div class="container">
+                <p>&copy; 2024 AbilityAssist. All rights reserved.</p>
+            </div>
+        </footer>
     </div>
-
-    <footer class="mt-5">
-        <div class="container">
-            <p>&copy; 2024 AbilityAssist</p>
-        </div>
-    </footer>
-
-    <!-- Bootstrap JS -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-    <!-- Google Maps JavaScript API with Places Autocomplete library -->
-    <script
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAWgNkwf11_tis-7MTs4dI-Dvm-e5EX-MA&callback=initMap&libraries=places"
-        async defer></script>
-
-     <script>
+    <script>
+        var userLocation;
         var map;
         var tutSouthCampusBounds = {
             north: -25.5372,
-            south: -25.5427,
+            south: -25.5444,
             east: 28.0983,
             west: 28.0929
         };
 
-        function initMap() {
-            // Coordinates for Tshwane University of Technology main campus in Pretoria West
-            var tutSouthCampus = { lat: -25.54055, lng: 28.095 };
 
-            map = new google.maps.Map(document.getElementById('map-container'), {
+        function initMap() {
+            // Initialize the map centered at an example location
+            var tutSouthCampus = { lat: -25.54055, lng: 28.095 };
+            map = new google.maps.Map(document.getElementById("map-container"), {
                 center: tutSouthCampus, // Center the map on TUT main campus
-                zoom: 16,
+                zoom: 15,
                 restriction: {
                     latLngBounds: tutSouthCampusBounds,
-                    strictBounds: true
+                    strictBounds: false
                     },
-            gestureHandling: 'cooperative' // Allow map panning within bounds
+                gestureHandling: 'cooperative' // Allow map panning within bounds
             });
-            // Get user's current location
+
+             // Get user's current location
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     function(position) {
+                        console.log(position);
+
                         // Retrieve user's current latitude and longitude
                         const latitude = position.coords.latitude;
                         const longitude = position.coords.longitude;
 
                         // Define the user's location as a LatLng object
-                        var userLocation = { lat: latitude, lng: longitude };
+                        userLocation = { lat: latitude, lng: longitude };
+                        console.log(userLocation);
 
                         // Create a marker at the user's location
                         var marker = new google.maps.Marker({
@@ -409,9 +429,40 @@
 
             // Set up markers for predefined locations
             setMarkers(map);
+
+            // Call calculateRoute when the form is submitted
+            document.getElementById("destinationForm").addEventListener("submit", function (event) {
+                event.preventDefault();
+                const origin = userLocation;
+                const destination = document.getElementById("destinationInput").value;
+
+                // Parse the coordinates (latitude and longitude)
+                const [latitude, longitude] = destination.split(',').map(Number);
+
+                // Perform further processing with the coordinates (e.g., calculate route)
+                console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
+
+                // Check if a valid destination is chosen
+                if (destination) {
+                    const geocoder = new google.maps.Geocoder();
+                    geocoder.geocode({ 'address': destination, 'bounds': tutSouthCampusBounds }, function (results, status) {
+                        if (status === 'OK') {
+                            const destinationLatLng = results[0].geometry.location;
+                            calculateRoute(origin, destination);
+                        } else {
+                            console.error('Geocoding failed due to: ' + status);
+                            document.getElementById('distanceResult').innerHTML = `
+                                <p>Failed to find destination. Please try again.</p>
+                            `;
+                        }
+                    });
+                } else {
+                    document.getElementById('distanceResult').innerHTML = `
+                        <p>Please choose a valid destination.</p>
+                    `;
+                }
+            });
         }
-
-
 
         // Data for the markers consisting of a name, a LatLng and a zIndex for the
         // order in which these markers should display on top of each other.
@@ -423,7 +474,6 @@
           ["Building 13", -25.53922, 28.0962, 8],
           ["One stop Post/Under-graduates", -25.54055, 28.09525, 7],
           ["I-Center", -25.5403, 28.09558, 6],
-          ["Building 14", -25.538888, 28.09612, 5],
           ["Gymnasium", -25.5413, 28.09568, 4],
           ["Student centre", -25.541454, 28.0951, 3],
           ["Men & Female Resident admin", -25.54025, 28.09490, 2],
@@ -431,11 +481,6 @@
         ];
 
         function setMarkers(map) {
-          // Adds markers to the map.
-          // Marker sizes are expressed as a Size of X,Y where the origin of the image
-          // (0,0) is located in the top left of the image.
-          // Origins, anchor positions and coordinates of the marker increase in the X
-          // direction to the right and in the Y direction down.
           const image = {
             url: "https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png",
             // This marker is 20 pixels wide by 32 pixels high.
@@ -467,103 +512,76 @@
           }
         }
 
-        document.getElementById('destinationForm').addEventListener('submit', function (event) {
-            event.preventDefault();
-            calculateDistance();
-        });
 
-        function calculateDistance() {
-            var destination = document.getElementById('destinationInput').value;
+        function calculateRoute(origin, destination) {
+            const directionsService = new google.maps.DirectionsService();
+            const directionsRenderer = new google.maps.DirectionsRenderer();
+            directionsRenderer.setMap(map);
 
-            // Get user's current location
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function (position) {
-                    var userLocation = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    };
+            const request = {
+                origin: origin,
+                destination: destination,
+                travelMode: google.maps.TravelMode.WALKING
+            };
 
-                    // Create a DirectionsService object
-                    var directionsService = new google.maps.DirectionsService();
+            directionsService.route(request, function (result, status) {
+                if (status === 'OK') {
+                    directionsRenderer.setDirections(result);
+                    // Display distance and duration from the response
+                    const distance = result.routes[0].legs[0].distance.text;
+                    const duration = result.routes[0].legs[0].duration.text;
+                    document.getElementById('distanceResult').innerHTML = `
+                        <p>Distance: ${distance}</p>
+                        <p>Duration: ${duration}</p>
+                    `;
 
-                    // Create a DirectionsRenderer object
-                    var directionsRenderer = new google.maps.DirectionsRenderer({
-                        map: map
-                    });
 
-                    // Set the options for the directions request
-                    var request = {
-                        origin: userLocation,
-                        destination: destination,
-                        travelMode: google.maps.TravelMode.WALKING // Specify walking mode
-                    };
+                    var text = "distance to your selected destination is "+distance+" and the time it will take is "+duration;
+                    console.log(text)
+                    if ('speechSynthesis' in window) {
+                        // Create a new SpeechSynthesisUtterance object
+                        const speech = new SpeechSynthesisUtterance(text);
 
-                    // Call the DirectionsService route() method to calculate the route
-                    directionsService.route(request, function (response, status) {
-                        if (status === 'OK') {
-                            // Display the route on the map
-                            directionsRenderer.setDirections(response);
-                        } else {
-                            // Handle error if directions request fails
-                            console.error('Error calculating directions:', status);
-                        }
-                    });
-                }, function () {
-                    console.error('Error: The Geolocation service failed.');
-                });
-            } else {
-                console.error('Error: Your browser doesn\'t support geolocation.');
-            }
+                        // Set properties (optional)
+                        // You can set properties like voice, volume, rate, pitch, etc.
+                        speech.voice = speechSynthesis.getVoices()[0]; // Default voice
+                        speech.volume = 1; // Max volume
+                        speech.rate = 1; // Normal speed
+                        speech.pitch = 1; // Normal pitch
+
+                        // Start speaking
+                        speechSynthesis.speak(speech);
+                    } else {
+                        console.error('Sorry, your browser does not support text-to-speech.');
+                    }
+                }else {
+                    console.error('Directions request failed due to: ' + status);
+                    document.getElementById('distanceResult').innerHTML = `
+                        <p>Failed to calculate route. Please try again.</p>
+                    `;
+                }
+            });
+        }
+
+        function startChat() {
+            // Function to handle chat button click
+            console.log("Chat button clicked.");
+            alert("Chat functionality is not yet implemented.");
+        }
+
+        function startEmergency() {
+            // Function to handle emergency button click
+            console.log("Emergency button clicked.");
+            alert("Emergency functionality is not yet implemented.");
         }
     </script>
 
-    <script>
-    var recognition;
-    var audioIndicator = document.getElementById('audioIndicator');
-
-    function startVoiceRecognition() {
-        audioIndicator.classList.add('active'); // Show audio indicator
-
-        speak("Hello! Please choose a destination by speaking the corresponding number.");
-        setTimeout(function () {
-            if ('webkitSpeechRecognition' in window) {
-                recognition = new webkitSpeechRecognition();
-                recognition.lang = 'en-US';
-                recognition.start();
-                recognition.onresult = function (event) {
-                    var transcript = event.results[0][0].transcript;
-                    speak("You said: " + transcript); // Speak the recognized text
-                    var destinationIndex = parseInt(transcript) - 1;
-                    var options = document.getElementById('destinationInput').options;
-                    if (destinationIndex >= 0 && destinationIndex < options.length) {
-                        options[destinationIndex].selected = true;
-                        speak("Selected destination: " + options[destinationIndex].text);
-                    }
-                };
-                recognition.onend = function () {
-                    audioIndicator.classList.remove('active'); // Hide audio indicator after speech ends
-                };
-                setTimeout(function () {
-                    recognition.stop();
-                }, 7000); // Stop recognition after 5 seconds
-            } else {
-                alert("Speech recognition not supported in this browser!");
-            }
-        }, 3000); // Wait 3 seconds before starting recognition after greeting
-    }
-
-    function speak(message) {
-        var speechSynthesis = window.speechSynthesis;
-        var speechMessage = new SpeechSynthesisUtterance(message);
-        speechSynthesis.speak(speechMessage);
-    }
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAWgNkwf11_tis-7MTs4dI-Dvm-e5EX-MA&callback=initMap&libraries=places">
     </script>
-
-
-
-
-
-
+    <!-- Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 
 </html>
