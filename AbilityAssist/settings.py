@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-pj2%sfc2q2m@=h5yq90rp)$91w^n59=9*z1@u5tb%fjr(naum4
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['.vercel.app']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -87,8 +87,6 @@ DATABASES = {
         'PORT': '5432',
     }
 }
-
-DATABASES["default"] = dj_database_url.parse("postgres://admin:eF4Z6hm5mJ5t1WrhEqnY4kRMlM1mvliP@dpg-coe24na0si5c7399lmig-a.frankfurt-postgres.render.com/abilityassistdb")
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'  # SMTP server address
