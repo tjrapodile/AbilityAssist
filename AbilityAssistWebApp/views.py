@@ -1,96 +1,81 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
-from .models import CustomUser, TravelHistory
-from .serializers import UserRegistrationSerializer, UserLoginSerializer
+from django.contrib.auth import logout as auth_logout
+from .models import UserProfile, TravelHistory
+from .forms import RegistrationForm, LoginForm
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.urls import reverse
-
-
+from django.contrib.auth.models import User
 def index(request):
     return render(request, 'index.html')
 
 
 def register(request):
     if request.method == 'POST':
-        email = request.POST.get('email')
-        username = request.POST.get('username')
-        last_name = request.POST.get('last_name')
-        phone = request.POST.get('phone')
-        password = request.POST.get('password')
-        confirm_password = request.POST.get('confirm_password')
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            # Extract data from the form
+            first_name = form.cleaned_data['first_name']
+            last_name = form.cleaned_data['last_name']
+            phone = form.cleaned_data['phone']
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
 
-        # You can add your own validation logic here before saving the user
+            # Create the user
+            user = User.objects.create_user(username=email, email=email, password=password, first_name=first_name,last_name=last_name)
 
-        # Create a dictionary with the form data
-        data = {
-            'email': email,
-            'username': username,
-            'last_name': last_name,
-            'phone': phone,
-            'password': password,
-            'confirm_password': confirm_password
-        }
+            # Create the user profile
+            UserProfile.objects.create(user=user, phone=phone)
 
-        # Serialize the data and validate it
-        serializer = UserRegistrationSerializer(data=data)
-        if serializer.is_valid():
-            # Save the user
-            user = serializer.save()
+            # Authenticate and login the user
+            user = authenticate(request, username=email, password=password)
+            login(request, user)
 
-            # Log in the user after registration
-            user = authenticate(email=email, password=password)
-            if user:
-                login(request, user)
-
-            return redirect('index')
+            # Redirect to a success page or any other desired page
+            return redirect('index')  # Replace 'index' with the name of the URL pattern for your desired page
     else:
-        # Initialize an empty serializer for GET requests
-        serializer = UserRegistrationSerializer()
+        form = RegistrationForm()
 
-    return render(request, 'register.html', {'form': serializer})
-
+    return render(request, 'register.html', {'form': form})
 
 def user_login(request):
-    template_name = 'login.html'
-    error = None  # Define the error variable at the beginning
-
     if request.method == 'POST':
-        serializer = UserLoginSerializer(data=request.POST)
-        if serializer.is_valid():
-            user = authenticate(email=serializer.validated_data['email'],
-                                password=serializer.validated_data['password'])
-            if user:
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+            user = authenticate(request, username=email, password=password)
+            if user is not None:
                 login(request, user)
-                return redirect('index')
+                return redirect('index')  # Assuming 'index' is a valid URL pattern name
             else:
-                error = 'Invalid email or password'
+                messages.error(request, 'Invalid email or password. Please try again.')
         else:
-            errors = serializer.errors
+            messages.error(request, 'Invalid form submission. Please check your input.')
     else:
-        errors = None
-        serializer = UserLoginSerializer()  # Initialize an empty serializer for GET requests
+        form = LoginForm()
 
-    return render(request, template_name, {'form': serializer, 'error': error, 'errors': errors})
-
+    return render(request, 'login.html', {'form': form})
 
 @login_required
 def edit_profile(request):
+    user_profile = UserProfile.objects.get(email=request.user.email)
+
     if request.method == 'POST':
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
         email = request.POST.get('email')
 
         # Update user_profile with new data
-        user_profile = request.user
         user_profile.first_name = first_name
         user_profile.last_name = last_name
         user_profile.email = email
         user_profile.save()
 
         messages.success(request, 'Your profile has been updated successfully.')
-        return redirect('index')
+        return redirect('login')
 
     else:
         messages.error(request, 'Your profile update experienced an error.')
@@ -98,20 +83,19 @@ def edit_profile(request):
     return render(request, 'edit_profile.html')
 
 
+
 @login_required
 def user_logout(request):
-    logout(request)
+    auth_logout(request)
     return redirect('index')
 
 
 def travel_history(request):
-    travel_entries = TravelHistory.objects.filter(logged_user=request.user)
+    travel_entries = TravelHistory.objects.filter(user=request.user)
     return render(request, 'travel_history.html', {'travel_entries': travel_entries})
-
 
 def about(request):
     return render(request, 'about.html')
-
 
 def contact(request):
     if request.method == 'POST':
@@ -136,11 +120,6 @@ def contact(request):
 
     return render(request, 'contact.html')
 
-
 def saved_locations(request):
     return render(request, 'saved_locations.html')
 
-
-def user_list(request):
-    users = CustomUser.objects.all()
-    return render(request, 'user_list.html', {'users': users})

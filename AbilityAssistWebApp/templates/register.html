@@ -277,10 +277,9 @@
 
                                 <div class="form-group">
                                     <label for="password">Password</label>
-                                    <input type="password" class="form-control" id="password" name="password">
-                                    {% if form.password.errors %}
-                                    <div class="error-message alert alert-danger mt-3"
-                                        role="alert">{{ form.password.errors }}</div>
+                                    <input type="password" class="form-control" id="password" name="password1">
+                                    {% if form.password1.errors %}
+                                    <div class="error-message alert alert-danger mt-3" role="alert">{{ form.password1.errors }}</div>
                                     {% endif %}
                                 </div>
 
@@ -288,8 +287,7 @@
                                     <label for="password2">Confirm Password</label>
                                     <input type="password" class="form-control" id="password2" name="password2">
                                     {% if form.password2.errors %}
-                                    <div class="error-message alert alert-danger mt-3"
-                                        role="alert">{{ form.password2.errors }}</div>
+                                    <div class="error-message alert alert-danger mt-3" role="alert">{{ form.password2.errors }}</div>
                                     {% endif %}
                                 </div>
 

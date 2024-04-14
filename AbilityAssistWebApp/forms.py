@@ -3,10 +3,15 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
+from .models import UserProfile
 
 class RegistrationForm(UserCreationForm):
     email = forms.EmailField(max_length=254, help_text='Required. Inform a valid email address.')
     phone = forms.CharField(max_length=10, help_text='Required. Enter your phone number.')
+    first_name = forms.CharField(max_length=30, help_text='Required. Enter your first name.')
+    last_name = forms.CharField(max_length=30, help_text='Required. Enter your last name.')
+    password1 = forms.CharField(widget=forms.PasswordInput, label='Password')
+    password2 = forms.CharField(widget=forms.PasswordInput, label='Password confirmation')
 
     class Meta:
         model = User
@@ -15,9 +20,12 @@ class RegistrationForm(UserCreationForm):
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
         password2 = self.cleaned_data.get("password2")
+        if not password1 or not password2:
+            raise forms.ValidationError("Both password fields are required")
         if password1 and password2 and password1 != password2:
             raise forms.ValidationError("Passwords do not match")
         return password2
+
 
     def clean_email(self):
         email = self.cleaned_data.get("email")
@@ -36,15 +44,17 @@ class RegistrationForm(UserCreationForm):
             raise forms.ValidationError("Invalid phone number. Please enter a 10-digit number.")
         return phone
 
-    def clean_password1(self):
-        password1 = self.cleaned_data.get("password1")
-        # Add custom password validation logic here
-        # For example, ensure the password has at least 8 characters and contains a mix of letters and numbers
-        if len(password1) < 8:
-            raise forms.ValidationError("Password must be at least 8 characters long")
-        if not any(char.isdigit() for char in password1) or not any(char.isalpha() for char in password1):
-            raise forms.ValidationError("Password must contain both letters and numbers")
-        return password1
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.email = self.cleaned_data["email"]
+        user.username = self.cleaned_data["first_name"] + self.cleaned_data[
+            "last_name"]  # Combine first and last name as username
+        user.set_password(self.cleaned_data["password1"])
+        if commit:
+            user.save()
+            UserProfile.objects.create(user=user, phone=self.cleaned_data['phone'])
+        return user
+
 
 
 class LoginForm(forms.Form):
