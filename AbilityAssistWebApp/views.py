@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout as auth_logout
-from .models import UserProfile, TravelHistory
+from .models import UserP, TravelHistory
 from .forms import RegistrationForm, LoginForm
 from django.contrib import messages
 from django.core.mail import send_mail
@@ -21,13 +21,13 @@ def register(request):
             last_name = form.cleaned_data['last_name']
             phone = form.cleaned_data['phone']
             email = form.cleaned_data['email']
-            password = form.cleaned_data['password']
+            password = form.cleaned_data['password1']
 
             # Create the user
             user = User.objects.create_user(username=email, email=email, password=password, first_name=first_name,last_name=last_name)
 
             # Create the user profile
-            UserProfile.objects.create(user=user, phone=phone)
+            UserP.objects.create(user=user, phone=phone)
 
             # Authenticate and login the user
             user = authenticate(request, username=email, password=password)
@@ -61,7 +61,7 @@ def user_login(request):
 
 @login_required
 def edit_profile(request):
-    user_profile = UserProfile.objects.get(email=request.user.email)
+    user_profile = UserP.objects.get(email=request.user.email)
 
     if request.method == 'POST':
         first_name = request.POST.get('first_name')
@@ -122,4 +122,7 @@ def contact(request):
 
 def saved_locations(request):
     return render(request, 'saved_locations.html')
+
+
+
 

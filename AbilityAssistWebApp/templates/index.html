@@ -575,6 +575,114 @@
             alert("Emergency functionality is not yet implemented.");
         }
     </script>
+    <script>
+    var recognition;
+    var isRecognizing = false; // Flag to track if recognition is active
+    var isSpeaking = false; // Flag to track if TTS is speaking
+
+    // Function to start voice recognition
+    function startVoiceRecognition() {
+        if (isRecognizing) return; // Only start recognition if it's not already active
+        isRecognizing = true; // Set flag to true
+
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.start();
+            recognition.onresult = function (event) {
+                var transcript = event.results[0][0].transcript;
+                if (!isSpeaking) { // Check if TTS is not speaking
+                    var interpretedNumber = interpretNumber(transcript);
+                    if (interpretedNumber === false) {
+                        speak("listening...listening");
+                    } else if (interpretedNumber !== undefined) {
+                        var destinationIndex = interpretedNumber;
+                        var options = document.getElementById('destinationInput').options;
+                        if (!isNaN(destinationIndex) && destinationIndex >= 1 && destinationIndex <= options.length) {
+                            options[destinationIndex - 1].selected = true;
+                            speak("Selected destination: " + options[destinationIndex - 1].text);
+                        } else {
+                            speak("Sorry, I didn't understand. Please speak a valid number.");
+                        }
+                    } else {
+                        speak("Sorry, I didn't understand. Please speak a valid number.");
+                    }
+                }
+            };
+
+            recognition.onend = function () {
+                isRecognizing = false; // Set flag to false
+                if (!isRecognizing) {
+                    startVoiceRecognition(); // Restart recognition to keep it active
+                }
+            };
+        } else {
+            alert("Speech recognition not supported in this browser!");
+        }
+    }
+
+    // Function to speak a message
+    function speak(message) {
+        isSpeaking = true; // Set flag to true while speaking
+        var speechSynthesis = window.speechSynthesis;
+        var speechMessage = new SpeechSynthesisUtterance(message);
+        speechSynthesis.speak(speechMessage);
+
+        // Listen for end of speech
+        speechMessage.onend = function(event) {
+            isSpeaking = false; // Set flag to false after speech ends
+        };
+    }
+
+    // Function to interpret number words
+    function interpretNumber(text) {
+        // Define a mapping of words to numbers
+        var numberWords = {
+            "one": 1,
+            "two": 2,
+            "three": 3,
+            "four": 4,
+            "five": 5,
+            // Add more mappings as needed
+        };
+
+        // Convert the text to lowercase and remove punctuation
+        text = text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+
+        console.log("Text after cleanup:", text);
+
+        // Check if the text corresponds to a number word in the mapping
+        if (text in numberWords) {
+            console.log("Interpreted number:", numberWords[text]);
+            return numberWords[text];
+        } else if (text.includes("hello") || text.includes("ability assist, help me")) {
+            console.log("Listening...");
+            return false;
+        } else if (!isNaN(parseInt(text))) { // Check if the text is a number
+            var num = parseInt(text);
+            console.log("Interpreted number:", num);
+            if (num >= 1 && num <= 5) { // Adjust the range according to your valid numbers
+                return num;
+            }
+        }
+        console.log("Unrecognized input");
+        return undefined; // Return undefined for unrecognized input
+    }
+
+
+    // Start speech recognition when the page loads
+    document.addEventListener('DOMContentLoaded', function () {
+        startVoiceRecognition();
+    });
+
+    // Error handling for speech recognition
+    if (recognition) {
+        recognition.onerror = function(event) {
+            console.error('Speech recognition error:', event.error);
+        };
+    }
+
+    </script>
 
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAWgNkwf11_tis-7MTs4dI-Dvm-e5EX-MA&callback=initMap&libraries=places">
     </script>

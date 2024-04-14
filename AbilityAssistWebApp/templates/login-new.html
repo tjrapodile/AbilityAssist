@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Login</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom CSS */
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #e7f1f7; /* Light blue background */
+            font-size: 1.2rem; /* Increased font size for better readability */
+        }
+
+        header {
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1000;
+        }
+
+        footer {
+            background-color: #343a40; /* Dark gray footer */
+            color: #fff;
+            text-align: center;
+            padding: 20px 0;
+            position: relative;
+            z-index: 1000;
+        }
+
+        .navbar-brand,
+        .nav-link {
+            font-family: 'Poppins', sans-serif;
+            color: #fff;
+        }
+
+        .navbar-dark .navbar-toggler-icon {
+            background-color: #fff;
+        }
+
+        .navbar-dark .navbar-nav .nav-link {
+            color: #fff;
+        }
+
+        .navbar-dark .navbar-nav .nav-link:hover {
+            color: #ffc107; /* Yellow on hover */
+        }
+
+        .dropdown-menu {
+            font-family: 'Poppins', sans-serif;
+            background-color: #343a40; /* Dark gray dropdown background */
+        }
+
+        .dropdown-item {
+            color: #fff;
+        }
+
+        .dropdown-item:hover {
+            background-color: #495057; /* Darker gray on hover */
+        }
+
+        h1 {
+            font-family: 'Montserrat', sans-serif;
+            color: #343a40; /* Dark gray heading */
+        }
+
+        label {
+            font-family: 'Poppins', sans-serif;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            border-radius: 25px; /* Rounded corners */
+            border: 2px solid #ced4da; /* Gray border */
+            padding: 10px 15px; /* Increased padding */
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #ffc107; /* Yellow border on focus */
+            box-shadow: 0 0 5px #ffc107; /* Yellow shadow on focus */
+        }
+
+        .btn-primary {
+            background-color: #ffc107; /* Yellow button */
+            border-color: #ffc107;
+            border-radius: 25px; /* Rounded corners */
+            font-weight: 600;
+            text-transform: uppercase;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #e0a800; /* Darker yellow on hover */
+            border-color: #e0a800;
+        }
+
+        .user-icon {
+            margin-right: 5px;
+        }
+
+        .registration-form {
+            background-color: #fff; /* White form background */
+            padding: 30px;
+            border-radius: 20px; /* Rounded corners */
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .mt-5 {
+            margin-top: 5rem;
+        }
+
+        .split-container {
+            display: flex;
+            flex-direction: column; /* Changed to column to center the form vertically */
+            align-items: center; /* Center horizontally */
+        }
+
+        .image-container {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .image-container img {
+            width: 50%;
+            border-radius: 10px;
+        }
+
+        .form-container {
+            width: 70%; /* Increased width for better visibility */
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 30px;
+            border-radius: 20px; /* Rounded corners */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group.has-error {
+            position: relative;
+        }
+
+        .form-group.has-error .form-control {
+            border-color: #f00; /* Red border color */
+        }
+
+        .form-group.has-error .error {
+            position: absolute;
+            bottom: -1.5em;
+            left: 0;
+            color: #f00; /* Red error message color */
+            font-size: 0.8em;
+        }
+
+        /* Custom CSS for Forgot Password Link */
+        .forgot-password-link,
+        .login-link {
+            color: #ffc107; /* Yellow color */
+            text-decoration: none; /* Remove underline */
+            font-family: 'Montserrat', sans-serif; /* Use Montserrat font */
+        }
+        
+        .forgot-password-link:hover,
+        .login-link:hover {
+            text-decoration: underline; /* Underline on hover */
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="{% url 'index' %}"><img src="/staticfiles/abilityassist.png"
+                        alt="AbilityAssist Logo" height="45" width="50">AbilityAssist</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'index' %}">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'about' %}">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'contact' %}">Contact</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Help</a>
+                        </li>
+                    </ul>
+                    <div class="nav-item dropdown ml-auto">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            {% if user.is_authenticated %}
+                            {{ user.get_full_name|default:user.username }}
+                            {% else %}
+                            Login to Volunteer Account
+                            {% endif %}
+                            <i class="fas fa-user"></i>
+                            <span class="username"></span>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            {% if user.is_authenticated %}
+                            <a class="dropdown-item" href="{% url 'edit_profile' %}">Edit/Delete Volunteer
+                                Profile</a>
+                            <a class="dropdown-item" href="{% url 'travel_history' %}">Volunteer Assist
+                                History</a>
+                            <a class="dropdown-item" href="{% url 'saved_locations' %}">Assistive
+                                Resources</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{% url 'logout' %}">Log Out</a>
+                            {% else %}
+                            <a class="dropdown-item" href="{% url 'login' %}">Log In</a>
+                            <a class="dropdown-item" href="{% url 'register' %}">Register</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="split-container">
+                    <div class="image-container">
+
+                    </div>
+                    <div class="form-container">
+                        <div class="registration-form container">
+                            <h2 class="text-center mb-4">User Login</h2>
+                            {% if user.is_authenticated %}
+                            <div class="alert alert-danger" role="alert">
+                                You are already logged in. Please <a href="{% url 'logout' %}"
+                                    class="alert-link">logout</a> to login with another account.
+                            </div>
+                            {% else %}
+                            <form method="post" action="{% url 'login' %}">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <label for="email">Email</label>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                    {% if form.email.errors %}
+                                    <div class="error-message alert alert-danger mt-3" role="alert">{{ form.email.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="password">Password</label>
+                                    <input type="password" class="form-control" id="password" name="password">
+                                    {% if form.password.errors %}
+                                    <div class="error-message alert alert-danger mt-3" role="alert">{{ form.password.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-block">Login</button>
+                            </form>
+                            {% if messages.success %}
+                            <div class="alert alert-danger mt-3" role="alert">
+                                {{ messages }}
+                            </div>
+                            {% endif %}
+                            {% endif %}
+                            <!-- Volunteer Login and Forgot Password Links -->
+                            <div class="row">
+                                <div class="col-md-6 text-left">
+                                    <p class="mb-0">Are you a volunteer?</p>
+                                    <a href="{% url 'volunteer_login' %}" class="btn btn-link login-link">Click here to login</a>
+                                </div>
+                                <div class="col-md-6 text-right">
+                                    <p class="mb-0">Forgot your password?</p>
+                                    <a href="{% url 'reset_password' %}" class="forgot-password-link">Reset Password</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 AbilityAssist</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Function to highlight the error fields
+            function highlightErrorFields() {
+                var errorFields = document.querySelectorAll('.form-group.has-error');
+                errorFields.forEach(function (field) {
+                    field.classList.add('highlight-error');
+                });
+            }
+
+            // Call the function when the page loads
+            highlightErrorFields();
+        });
+    </script>
+
+</body>
+
+</html>

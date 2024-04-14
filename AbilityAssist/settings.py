@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -87,12 +88,20 @@ DATABASES = {
     }
 }
 
+DATABASES["default"] = dj_database_url.parse("postgres://admin:eF4Z6hm5mJ5t1WrhEqnY4kRMlM1mvliP@dpg-coe24na0si5c7399lmig-a.frankfurt-postgres.render.com/abilityassistdb")
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'  # SMTP server address
 EMAIL_PORT = 587  # SMTP server port (typically 587 for TLS)
 EMAIL_USE_TLS = True  # Set to True if your SMTP server requires TLS/SSL
 EMAIL_HOST_USER = 'abilityassistcompany@gmail.com'  # Your email address for sending emails
 EMAIL_HOST_PASSWORD = 'password123!@*'  # Your email account password
+
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # Default backend for username authentication
+    'AbilityAssistWebApp.backends.EmailAuthBackend',  # Custom backend for email authentication
+]
 
 
 # Password validation

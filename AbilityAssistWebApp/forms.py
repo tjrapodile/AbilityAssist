@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
-from .models import UserProfile
+from .models import UserP
 
 class RegistrationForm(UserCreationForm):
     email = forms.EmailField(max_length=254, help_text='Required. Inform a valid email address.')
@@ -52,7 +52,7 @@ class RegistrationForm(UserCreationForm):
         user.set_password(self.cleaned_data["password1"])
         if commit:
             user.save()
-            UserProfile.objects.create(user=user, phone=self.cleaned_data['phone'])
+            UserP.objects.create(user=user, phone=self.cleaned_data['phone'])
         return user
 
 
