@@ -15,81 +15,95 @@
     <style>
         /* Custom CSS */
         body {
-            font-family: 'Poppins', sans-serif; /* Exotic font */
-            background-color: #f0f0f0; /* Light gray background */
+            font-family: 'Poppins', sans-serif;
+            background-color: #e7f1f7;
             color: #333;
             margin: 0;
             padding: 0;
+            font-size: 1.2rem;
         }
 
         header {
             margin-bottom: 20px;
+            position: relative;
+            z-index: 1000;
         }
 
         footer {
-            background-color: #333;
-            color: #ffc107;
+            background-color: #343a40;
+            color: #fff;
             text-align: center;
             padding: 20px 0;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
+            position: relative;
+            z-index: 1000;
         }
 
         .navbar-brand,
         .nav-link {
-            font-family: 'Raleway', sans-serif; /* Exotic font */
-            color: #fff; /* White color */
+            font-family: 'Poppins', sans-serif;
+            color: #fff;
         }
 
         .navbar-dark .navbar-toggler-icon {
-            background-color: #fff; /* White color */
+            background-color: #fff;
         }
 
         .navbar-dark .navbar-nav .nav-link {
-            color: #fff; /* White color */
+            color: #fff;
         }
 
         .navbar-dark .navbar-nav .nav-link:hover {
-            color: #ffc107; /* Yellow color on hover */
+            color: #ffc107;
         }
 
         .dropdown-menu {
-            font-family: 'Raleway', sans-serif; /* Exotic font */
-            background-color: #333; /* Dark background */
+            font-family: 'Poppins', sans-serif;
+            background-color: #343a40;
         }
 
         .dropdown-item {
-            color: #fff; /* White color */
+            color: #fff;
         }
 
         .dropdown-item:hover {
-            background-color: #ffc107; /* Yellow color on hover */
+            background-color: #495057;
         }
 
         h1 {
-            font-family: 'Montserrat', sans-serif; /* Exotic font */
-            color: #333; /* Dark gray color */
+            font-family: 'Montserrat', sans-serif;
+            color: #343a40;
         }
 
         label {
-            font-family: 'Poppins', sans-serif; /* Exotic font */
-            color: #666; /* Light gray color */
-            margin-bottom: 0.5rem; /* Adjust space between label and input */
+            font-family: 'Poppins', sans-serif;
+            color: #495057;
+            margin-bottom: 0.5rem;
         }
 
         .form-control {
-            border-color: #ffc107; /* Yellow color for form input border */
+            border-radius: 25px;
+            border: 2px solid #ced4da;
+            padding: 10px 15px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #ffc107;
+            box-shadow: 0 0 5px #ffc107;
         }
 
         .btn-primary {
-            background-color: #ffc107; /* Yellow color for primary button */
-            border-color: #ffc107; /* Yellow color for primary button border */
+            background-color: #ffc107;
+            border-color: #ffc107;
+            border-radius: 25px;
+            font-weight: 600;
+            text-transform: uppercase;
+            transition: background-color 0.3s ease;
         }
 
         .btn-primary:hover {
-            background-color: #e0a800; /* Darker yellow color on hover */
-            border-color: #e0a800; /* Darker yellow color on hover */
+            background-color: #e0a800;
+            border-color: #e0a800;
         }
 
         .user-icon {
@@ -97,12 +111,13 @@
         }
 
         .edit-profile-form {
-            max-width: 400px; /* Set maximum width for the form */
-            margin: auto; /* Center the form horizontally */
-            padding: 20px;
             background-color: #fff;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: auto;
+            margin-bottom: 100px;
         }
     </style>
 </head>
@@ -111,14 +126,14 @@
 <header>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'index' %}"><img src="/staticfiles/abilityassist.png"
-                        alt="AbilityAssist Logo" height="45" width="50">AbilityAssist</a>
+            <a class="navbar-brand" href="{% url 'index' %}"><img src="/staticfiles/abilityassist.png" alt="AbilityAssist Logo"
+                        height="45" width="50">AbilityAssist</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                     aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-                <ul class="navbar-nav">
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mr-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'index' %}">Home</a>
                     </li>
@@ -131,70 +146,59 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#">Help</a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            {% if user.is_authenticated %}
-                                <i class="fas fa-user user-icon"></i>{{ user.username }}
-                            {% else %}
-                                Login to your Account
-                            {% endif %}
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            {% if user.is_authenticated %}
-                                <a class="dropdown-item" href="{% url 'edit_profile' %}">Edit Profile</a>
-                                <a class="dropdown-item" href="{% url 'travel_history' %}">Check search history</a>
-                                <a class="dropdown-item" href="{% url 'saved_locations' %}">Saved Locations</a>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="{% url 'logout' %}">Log Out</a>
-                            {% else %}
-                                <a class="dropdown-item" href="{% url 'login' %}">Login</a>
-                                <a class="dropdown-item" href="{% url 'register' %}">Register</a>
-                            {% endif %}
-                        </div>
-                    </li>
                 </ul>
+                <div class="nav-item dropdown ml-auto">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        {% if user.is_authenticated %}
+                        {{ user.get_full_name|default:user.username }}
+                        {% else %}
+                        Login to Volunteer Account
+                        {% endif %}
+                        <i class="fas fa-user"></i>
+                        <span class="username"></span>
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        {% if user.is_authenticated %}
+                        <a class="dropdown-item" href="{% url 'edit_profile' %}">Edit/Delete Volunteer
+                            Profile</a>
+                        <a class="dropdown-item" href="{% url 'travel_history' %}">Volunteer Assist
+                            History</a>
+                        <a class="dropdown-item" href="{% url 'saved_locations' %}">Assistive
+                            Resources</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{% url 'logout' %}">Log Out</a>
+                        {% else %}
+                        <a class="dropdown-item" href="{% url 'login' %}">Log In</a>
+                        <a class="dropdown-item" href="{% url 'register' %}">Register</a>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
 </header>
 
 <div class="container mt-5">
-    <div class="row">
-        <div class="col-md-12">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
             <h1>Edit Profile</h1>
             <form method="post" class="edit-profile-form" action="{% url 'edit_profile' %}">
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="id_first_name">First Name</label>
                     <input type="text" class="form-control" id="id_first_name" name="first_name" value="{{ user.first_name }}">
-                    {% if form.errors.first_name %}
-                        <span class="text-danger">{{ form.errors.first_name.0 }}</span>
-                    {% endif %}
                 </div>
                 <div class="form-group">
                     <label for="id_last_name">Last Name</label>
                     <input type="text" class="form-control" id="id_last_name" name="last_name" value="{{ user.last_name }}">
-                    {% if form.errors.last_name %}
-                        <span class="text-danger">{{ form.errors.last_name.0 }}</span>
-                    {% endif %}
                 </div>
                 <div class="form-group">
                     <label for="id_email">Email Address</label>
                     <input type="email" class="form-control" id="id_email" name="email" value="{{ user.email }}">
-                    {% if form.errors.email %}
-                        <span class="text-danger">{{ form.errors.email.0 }}</span>
-                    {% endif %}
                 </div>
                 <button type="submit" class="btn btn-primary">Save Changes</button>
             </form>
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-danger" role="alert">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
         </div>
     </div>
 </div>

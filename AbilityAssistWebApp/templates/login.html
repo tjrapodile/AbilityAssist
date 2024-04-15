@@ -160,6 +160,26 @@
             color: #f00; /* Red error message color */
             font-size: 0.8em;
         }
+
+        /* Custom CSS for Forgot Password Link */
+        .forgot-password-link {
+            color: #ffc107; /* Yellow color */
+            text-decoration: none; /* Remove underline */
+        }
+
+        .forgot-password-link:hover {
+            text-decoration: underline; /* Underline on hover */
+        }
+
+        /* Custom CSS for Login Link */
+        .login-link {
+            color: #ffc107; /* Yellow color */
+            text-decoration: none; /* Remove underline */
+        }
+
+        .login-link:hover {
+            text-decoration: underline; /* Underline on hover */
+        }
     </style>
 </head>
 
@@ -257,12 +277,27 @@
 
                                 <button type="submit" class="btn btn-primary btn-block">Login</button>
                             </form>
+                            <div class="mt-3 text-center"> <!-- Added text-center class here -->
+                                <p>Don't have an account yet?</p>
+                                <a href="{% url 'register' %}" class="btn btn-link">Register here</a>
+                            </div>
                             {% if messages.success %}
                             <div class="alert alert-danger mt-3" role="alert">
                                 {{ messages }}
                             </div>
                             {% endif %}
                             {% endif %}
+                            <!-- Volunteer Login and Forgot Password Links -->
+                            <div class="row">
+                                <div class="col-md-6 text-left">
+                                    <p class="mb-0">Are you a volunteer?</p>
+                                    <a href="{% url 'volunteer_login' %}" class="btn btn-link login-link">Click here to login</a>
+                                </div>
+                                <div class="col-md-6 text-right">
+                                    <p class="mb-0">Forgot your password?</p>
+                                    <a href="{% url 'password_reset' %}" class="forgot-password-link">Reset Password</a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
