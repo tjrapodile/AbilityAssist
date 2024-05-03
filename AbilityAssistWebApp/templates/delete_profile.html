@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Volunteer Login</title>
+    <title>Volunteer Registration</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <!-- Font Awesome -->
@@ -160,26 +160,6 @@
             color: #f00; /* Red error message color */
             font-size: 0.8em;
         }
-
-        /* Custom CSS for Forgot Password Link */
-        .forgot-password-link {
-            color: #ffc107; /* Yellow color */
-            text-decoration: none; /* Remove underline */
-        }
-        
-        .forgot-password-link:hover {
-            text-decoration: underline; /* Underline on hover */
-        }
-
-        /* Custom CSS for Login Link */
-        .login-link {
-            color: #ffc107; /* Yellow color */
-            text-decoration: none; /* Remove underline */
-        }
-        
-        .login-link:hover {
-            text-decoration: underline; /* Underline on hover */
-        }
     </style>
 </head>
 
@@ -224,8 +204,7 @@
                             {% if user.is_authenticated %}
                             <a class="dropdown-item" href="{% url 'edit_profile' %}">Edit/Delete Volunteer
                                 Profile</a>
-                            <a class="dropdown-item" href="{% url 'travel_history' %}">Volunteer Assist
-                                History</a>
+                            <a class="dropdown-item" href="{% url 'trips' %}">Trips</a>
                             <a class="dropdown-item" href="{% url 'saved_locations' %}">Assistive
                                 Resources</a>
                             <div class="dropdown-divider"></div>
@@ -250,32 +229,68 @@
                     </div>
                     <div class="form-container">
                         <div class="registration-form container">
-                            <h2 class="text-center mb-4">Volunteer Login</h2>
-                            {% if user.is_authenticated %}
+                            <h2 class="text-center mb-4">Volunteer Registration</h2>
+                            {% if volunteer.is_authenticated %}
                             <div class="alert alert-danger" role="alert">
                                 You are already logged in. Please <a href="{% url 'logout' %}"
-                                    class="alert-link">logout</a> to login with another account.
+                                    class="alert-link">logout</a> to register a new account.
                             </div>
                             {% else %}
-                            <form method="post" action="{% url 'login' %}">
+                            <form method="post" action="{% url 'register' %}">
                                 {% csrf_token %}
+                                <div class="form-group">
+                                    <label for="first_name">First Name</label>
+                                    <input type="text" class="form-control" id="first_name" name="first_name">
+                                    {% if form.first_name.errors %}
+                                    <div class="error-message alert alert-danger mt-3"
+                                        role="alert">{{ form.first_name.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="last_name">Last Name</label>
+                                    <input type="text" class="form-control" id="last_name" name="last_name">
+                                    {% if form.last_name.errors %}
+                                    <div class="error-message alert alert-danger mt-3"
+                                        role="alert">{{ form.last_name.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="phone">Phone Number</label>
+                                    <input type=tel class="form-control" id="phone" name="phone" required>
+                                    {% if form.phone.errors %}
+                                    <div class="error-message alert alert-danger mt-3"
+                                        role="alert">{{ form.phone.errors }}</div>
+                                    {% endif %}
+                                </div>
+
                                 <div class="form-group">
                                     <label for="email">Email</label>
                                     <input type="email" class="form-control" id="email" name="email" required>
                                     {% if form.email.errors %}
-                                    <div class="error-message alert alert-danger mt-3" role="alert">{{ form.email.errors }}</div>
+                                    <div class="error-message alert alert-danger mt-3"
+                                        role="alert">{{ form.email.errors }}</div>
                                     {% endif %}
                                 </div>
 
                                 <div class="form-group">
                                     <label for="password">Password</label>
-                                    <input type="password" class="form-control" id="password" name="password">
-                                    {% if form.password.errors %}
-                                    <div class="error-message alert alert-danger mt-3" role="alert">{{ form.password.errors }}</div>
+                                    <input type="password" class="form-control" id="password" name="password1">
+                                    {% if form.password1.errors %}
+                                    <div class="error-message alert alert-danger mt-3" role="alert">{{ form.password1.errors }}</div>
                                     {% endif %}
                                 </div>
 
-                                <button type="submit" class="btn btn-primary btn-block">Login</button>
+                                <div class="form-group">
+                                    <label for="password2">Confirm Password</label>
+                                    <input type="password" class="form-control" id="password2" name="password2">
+                                    {% if form.password2.errors %}
+                                    <div class="error-message alert alert-danger mt-3" role="alert">{{ form.password2.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-block">Register</button>
                             </form>
                             {% if messages.success %}
                             <div class="alert alert-danger mt-3" role="alert">
@@ -283,11 +298,6 @@
                             </div>
                             {% endif %}
                             {% endif %}
-                            <!-- Forgot Password Link -->
-                            <div class="text-right">
-                                <p class="mb-0">Forgot your password?</p>
-                                <a href="{% url 'password_reset' %}" class="forgot-password-link">Reset Password</a>
-                            </div>
                         </div>
                     </div>
                 </div>

@@ -1,13 +1,13 @@
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout as auth_logout
-from .models import UserP, TravelHistory
-from .forms import RegistrationForm, LoginForm
+from django.contrib.auth import logout
+from .forms import RegistrationForm, LoginForm, EditUserForm
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.urls import reverse
-from django.contrib.auth.models import User
 def index(request):
     return render(request, 'index.html')
 
@@ -16,24 +16,10 @@ def register(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
-            # Extract data from the form
-            first_name = form.cleaned_data['first_name']
-            last_name = form.cleaned_data['last_name']
-            phone = form.cleaned_data['phone']
-            email = form.cleaned_data['email']
-            password = form.cleaned_data['password1']
-
-            # Create the user
-            user = User.objects.create_user(username=email, email=email, password=password, first_name=first_name,last_name=last_name)
-
-            # Create the user profile
-            UserP.objects.create(user=user, phone=phone)
-
-            # Authenticate and login the user
-            user = authenticate(request, username=email, password=password)
+            user = form.save()
+            user.save()
+            profile = authenticate(request, username=user.username, password=user.password)
             login(request, user)
-
-            # Redirect to a success page or any other desired page
             return redirect('index')  # Replace 'index' with the name of the URL pattern for your desired page
     else:
         form = RegistrationForm()
@@ -44,55 +30,43 @@ def user_login(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
-            email = form.cleaned_data['email']
+            username = form.cleaned_data['username']
             password = form.cleaned_data['password']
-            user = authenticate(request, username=email, password=password)
+            user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
-                return redirect('index')  # Assuming 'index' is a valid URL pattern name
+                return redirect('index')
             else:
-                messages.error(request, 'Invalid email or password. Please try again.')
+                # Invalid credentials, display error message
+                return render(request, 'login.html', {'form': form, 'error_message': 'Invalid username or password. Please try again.'})
         else:
-            messages.error(request, 'Invalid form submission. Please check your input.')
+            # Invalid form submission, display error message
+            return render(request, 'login.html', {'form': form, 'error_message': 'Invalid form submission. Please check your input.'})
     else:
         form = LoginForm()
-
-    return render(request, 'login.html', {'form': form})
-
-@login_required
-def edit_profile(request):
-    user_profile = UserP.objects.get(email=request.user.email)
-
-    if request.method == 'POST':
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-        email = request.POST.get('email')
-
-        # Update user_profile with new data
-        user_profile.first_name = first_name
-        user_profile.last_name = last_name
-        user_profile.email = email
-        user_profile.save()
-
-        messages.success(request, 'Your profile has been updated successfully.')
-        return redirect('login')
-
-    else:
-        messages.error(request, 'Your profile update experienced an error.')
-
-    return render(request, 'edit_profile.html')
+        return render(request, 'login.html', {'form': form})
 
 
 
 @login_required
 def user_logout(request):
-    auth_logout(request)
-    return redirect('index')
+    logout(request)
+    return redirect('login')
+
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        form = EditUserForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('index')  # Redirect to the user's profile page after editing
+    else:
+        form = EditUserForm(instance=request.user)
+    return render(request, 'edit_profile.html', {'form': form})
 
 
-def travel_history(request):
-    travel_entries = TravelHistory.objects.filter(user=request.user)
-    return render(request, 'travel_history.html', {'travel_entries': travel_entries})
+def trips(request):
+    return render(request, 'trips.html')
 
 def about(request):
     return render(request, 'about.html')
@@ -120,9 +94,39 @@ def contact(request):
 
     return render(request, 'contact.html')
 
-def saved_locations(request):
-    return render(request, 'saved_locations.html')
 
+def admin_login(request):
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+            user = authenticate(request, username=email, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('index')  # Assuming 'index' is a valid URL pattern name
+            else:
+                messages.error(request, 'Invalid email or password. Please try again.')
+        else:
+            messages.error(request, 'Invalid form submission. Please check your input.')
+    else:
+        form = LoginForm()
+
+    return render(request, 'admin_login.html', {'form': form})
+
+
+
+@login_required
+def reset_password(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Password changed successfully!')
+            return redirect('profile')
+    else:
+        form = PasswordChangeForm(request.user)
+    return render(request, 'change_password.html', {'form': form})
 
 
 
