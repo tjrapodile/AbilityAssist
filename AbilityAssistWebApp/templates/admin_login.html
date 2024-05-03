@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Volunteer Login</title>
+    <title>Admin Login</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <!-- Font Awesome -->
@@ -143,6 +143,7 @@
             padding: 30px;
             border-radius: 20px; /* Rounded corners */
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom:50px;
         }
 
         .form-group.has-error {
@@ -188,26 +189,13 @@
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
-                <a class="navbar-brand" href="{% url 'index' %}"><img src="/staticfiles/abilityassist.png"
-                        alt="AbilityAssist Logo" height="45" width="50">AbilityAssist</a>
+                <img src="/staticfiles/abilityassist.png" alt="AbilityAssist Logo" height="45" width="50">
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                     aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav mr-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'index' %}">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'about' %}">About</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'contact' %}">Contact</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Help</a>
-                        </li>
                     </ul>
                     <div class="nav-item dropdown ml-auto">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
@@ -215,17 +203,15 @@
                             {% if user.is_authenticated %}
                             {{ user.get_full_name|default:user.username }}
                             {% else %}
-                            Login to Volunteer Account
+                            Login to Profile
                             {% endif %}
                             <i class="fas fa-user"></i>
                             <span class="username"></span>
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                             {% if user.is_authenticated %}
-                            <a class="dropdown-item" href="{% url 'edit_profile' %}">Edit/Delete Volunteer
-                                Profile</a>
-                            <a class="dropdown-item" href="{% url 'travel_history' %}">Volunteer Assist
-                                History</a>
+                            <a class="dropdown-item" href="{% url 'edit_profile' %}">Edit/Delete Profile</a>
+                            <a class="dropdown-item" href="{% url 'travel_history' %}">Trips</a>
                             <a class="dropdown-item" href="{% url 'saved_locations' %}">Assistive
                                 Resources</a>
                             <div class="dropdown-divider"></div>
@@ -250,7 +236,7 @@
                     </div>
                     <div class="form-container">
                         <div class="registration-form container">
-                            <h2 class="text-center mb-4">Volunteer Login</h2>
+                            <h2 class="text-center mb-4">Admin Login</h2>
                             {% if user.is_authenticated %}
                             <div class="alert alert-danger" role="alert">
                                 You are already logged in. Please <a href="{% url 'logout' %}"
