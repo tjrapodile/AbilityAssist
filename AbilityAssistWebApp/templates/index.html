@@ -61,7 +61,7 @@
 
         .dropdown-menu {
             font-family: 'Poppins', sans-serif;
-            background-color: #333;
+            background-color: #343a40;
         }
 
         .dropdown-item {
@@ -70,6 +70,7 @@
 
         .dropdown-item:hover {
             background-color: #ffc107;
+            color: #fff;
         }
 
         h2 {
@@ -234,21 +235,7 @@
             display: block; /* Displayed when active */
         }
 
-        /* Updated styles for dropdown menu */
-        .dropdown-menu {
-            font-family: 'Poppins', sans-serif;
-            background-color: #343a40;
-            border: none;
-        }
 
-        .dropdown-item {
-            color: #ffc107;
-        }
-
-        .dropdown-item:hover {
-            background-color: #343a40;
-            color: #fff;
-        }
     </style>
 </head>
 
@@ -258,7 +245,7 @@
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
                 <a class="navbar-brand" href="{% url 'index' %}"><img src="/staticfiles/abilityassist.png" alt="AbilityAssist Logo"
-                        height="45" width="50">Ability Assist</a>
+                        height="45" width="50">AbilityAssist</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                     aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -275,7 +262,7 @@
                             <a class="nav-link" href="{% url 'contact' %}">Contact</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Help</a>
+                            <a class="nav-link" href="{% url 'help' %}">Help</a>
                         </li>
                     </ul>
                     <div class="nav-item dropdown ml-auto">
@@ -336,7 +323,7 @@
 
                 <div id="distanceResult"></div>
                 <div class="button-container">
-                    <button class="chat-button" onclick="startChat()">
+                    <button class="chat-button" id="voiceButton">
                         <span class="fas fa-comment-dots"></span>
                         Chat
                     </button>
@@ -421,10 +408,6 @@
                 console.error('Error: Your browser doesn\'t support geolocation.');
             }
 
-            // Set up autocomplete for the destination input
-            var input = document.getElementById('destinationInput');
-            var autocomplete = new google.maps.places.Autocomplete(input);
-            autocomplete.bindTo('bounds', map);
 
             // Set up markers for predefined locations
             setMarkers(map);
@@ -575,113 +558,32 @@
         }
     </script>
     <script>
-    var recognition;
-    var isRecognizing = false; // Flag to track if recognition is active
-    var isSpeaking = false; // Flag to track if TTS is speaking
+        document.getElementById("destinationForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+            const origin = userLocation; // User's current location
+            const destination = document.getElementById("destinationInput").value; // Chosen destination
 
-    // Function to start voice recognition
-    function startVoiceRecognition() {
-        if (isRecognizing) return; // Only start recognition if it's not already active
-        isRecognizing = true; // Set flag to true
-
-        if ('webkitSpeechRecognition' in window) {
-            recognition = new webkitSpeechRecognition();
-            recognition.lang = 'en-US';
-            recognition.start();
-            recognition.onresult = function (event) {
-                var transcript = event.results[0][0].transcript;
-                if (!isSpeaking) { // Check if TTS is not speaking
-                    var interpretedNumber = interpretNumber(transcript);
-                    if (interpretedNumber === false) {
-                        speak("listening...listening");
-                    } else if (interpretedNumber !== undefined) {
-                        var destinationIndex = interpretedNumber;
-                        var options = document.getElementById('destinationInput').options;
-                        if (!isNaN(destinationIndex) && destinationIndex >= 1 && destinationIndex <= options.length) {
-                            options[destinationIndex - 1].selected = true;
-                            speak("Selected destination: " + options[destinationIndex - 1].text);
-                        } else {
-                            speak("Sorry, I didn't understand. Please speak a valid number.");
-                        }
-                    } else {
-                        speak("Sorry, I didn't understand. Please speak a valid number.");
-                    }
+            // Send data to backend using AJAX
+            $.ajax({
+                type: "POST",
+                url: "/store_trip/", // URL of the backend view function to handle storing trips
+                data: {
+                    csrfmiddlewaretoken: "{{ csrf_token }}", // Include CSRF token for security
+                    start_point: JSON.stringify(origin),
+                    destination: destination
+                },
+                success: function (response) {
+                    console.log(response); // Log response from backend (optional)
+                    // Handle success response if needed (optional)
+                },
+                error: function (xhr, errmsg, err) {
+                    console.log(xhr.status + ": " + xhr.responseText); // Log error message (optional)
+                    // Handle error response if needed (optional)
                 }
-            };
-
-            recognition.onend = function () {
-                isRecognizing = false; // Set flag to false
-                if (!isRecognizing) {
-                    startVoiceRecognition(); // Restart recognition to keep it active
-                }
-            };
-        } else {
-            alert("Speech recognition not supported in this browser!");
-        }
-    }
-
-    // Function to speak a message
-    function speak(message) {
-        isSpeaking = true; // Set flag to true while speaking
-        var speechSynthesis = window.speechSynthesis;
-        var speechMessage = new SpeechSynthesisUtterance(message);
-        speechSynthesis.speak(speechMessage);
-
-        // Listen for end of speech
-        speechMessage.onend = function(event) {
-            isSpeaking = false; // Set flag to false after speech ends
-        };
-    }
-
-    // Function to interpret number words
-    function interpretNumber(text) {
-        // Define a mapping of words to numbers
-        var numberWords = {
-            "one": 1,
-            "two": 2,
-            "three": 3,
-            "four": 4,
-            "five": 5,
-            // Add more mappings as needed
-        };
-
-        // Convert the text to lowercase and remove punctuation
-        text = text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
-
-        console.log("Text after cleanup:", text);
-
-        // Check if the text corresponds to a number word in the mapping
-        if (text in numberWords) {
-            console.log("Interpreted number:", numberWords[text]);
-            return numberWords[text];
-        } else if (text.includes("hello") || text.includes("ability assist, help me")) {
-            console.log("Listening...");
-            return false;
-        } else if (!isNaN(parseInt(text))) { // Check if the text is a number
-            var num = parseInt(text);
-            console.log("Interpreted number:", num);
-            if (num >= 1 && num <= 5) { // Adjust the range according to your valid numbers
-                return num;
-            }
-        }
-        console.log("Unrecognized input");
-        return undefined; // Return undefined for unrecognized input
-    }
-
-
-    // Start speech recognition when the page loads
-    document.addEventListener('DOMContentLoaded', function () {
-        startVoiceRecognition();
-    });
-
-    // Error handling for speech recognition
-    if (recognition) {
-        recognition.onerror = function(event) {
-            console.error('Speech recognition error:', event.error);
-        };
-    }
-
+            });
+        });
     </script>
+
 
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAWgNkwf11_tis-7MTs4dI-Dvm-e5EX-MA&callback=initMap&libraries=places">
     </script>

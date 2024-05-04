@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Travel History</title>
+    <title>Trip History AbilityAssist</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <!-- Font Awesome -->
@@ -17,29 +17,31 @@
         /* Custom CSS */
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #f0f0f0;
+            background-color: #e7f1f7;
             color: #333;
             margin: 0;
             padding: 0;
+            font-size: 1.2rem;
         }
 
         header {
             margin-bottom: 20px;
+            position: relative;
+            z-index: 1000;
         }
 
         footer {
             background-color: #343a40;
-            color: #ffc107;
+            color: #fff;
             text-align: center;
             padding: 20px 0;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
+            position: relative;
+            z-index: 1000;
         }
 
         .navbar-brand,
         .nav-link {
-            font-family: 'Raleway', sans-serif;
+            font-family: 'Poppins', sans-serif;
             color: #fff;
         }
 
@@ -56,7 +58,7 @@
         }
 
         .dropdown-menu {
-            font-family: 'Raleway', sans-serif;
+            font-family: 'Poppins', sans-serif;
             background-color: #343a40;
         }
 
@@ -65,16 +67,87 @@
         }
 
         .dropdown-item:hover {
-            background-color: #ffc107;
+             background-color: #ffc107;
+            color: #fff;
         }
 
         h1 {
             font-family: 'Montserrat', sans-serif;
             color: #343a40;
-            margin-bottom: 20px;
-            font-weight: bold;
         }
 
+        p {
+            font-family: 'Poppins', sans-serif;
+            color: #666;
+
+        }
+
+        .about-content {
+            margin-top: 50px;
+            padding: 0 15px; /* Added padding for better mobile display */
+        }
+
+        .feature {
+            margin-top: 30px;
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+
+        .feature h2 {
+            color: #ffc107;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .feature p {
+            color: #666;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .features {
+            display: flex;
+            flex-wrap: wrap; /* Added flex-wrap to handle small screens */
+            justify-content: space-between;
+            margin-top: 30px;
+            padding: 0 15px; /* Added padding for better mobile display */
+        }
+
+        /* Added style for each feature */
+        .feature.left {
+            text-align: center;
+            margin-bottom: 20px; /* Added bottom margin for spacing */
+        }
+
+        .feature.center {
+            text-align: center;
+            margin-bottom: 20px; /* Added bottom margin for spacing */
+        }
+
+        .feature.right {
+            text-align: center;
+            margin-bottom: 20px; /* Added bottom margin for spacing */
+        }
+
+        /* Adjustments for smaller screens */
+        @media (max-width: 768px) {
+            .about-content {
+                margin-top: 20px;
+            }
+
+            .feature {
+                padding: 15px;
+                margin-bottom: 20px; /* Added bottom margin for spacing */
+            }
+
+            .navbar-brand,
+            .nav-link {
+                font-size: 18px;
+            }
+        }
         .table-container {
             border-radius: 15px;
             overflow: hidden;
@@ -107,63 +180,64 @@
         tbody tr:hover {
             background-color: #ddd;
         }
+
     </style>
 </head>
 
 <body>
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container">
-                <<a class="navbar-brand" href="{% url 'index' %}"><img src="/staticfiles/abilityassist.png" alt="AbilityAssist Logo" height="45" width="50">AbilityAssist</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'index' %}"><img src="/staticfiles/abilityassist.png" alt="AbilityAssist Logo" height="45" width="50">AbilityAssist</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                     aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-                    <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'index' %}">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'about' %}">About</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'contact' %}">Contact</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Help</a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                {% if user.is_authenticated %}
-                                <i class="fas fa-user user-icon"></i>{{ user.username }}
-                                {% else %}
-                                Login to your Account
-                                {% endif %}
-                            </a>
-                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                {% if user.is_authenticated %}
-                                <a class="dropdown-item" href="{% url 'edit_profile' %}">Edit Profile</a>
-                                <a class="dropdown-item" href="{% url 'travel_history' %}">Check search history</a>
-                                <a class="dropdown-item" href="{% url 'saved_locations' %}">Saved Locations</a>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="{% url 'logout' %}">Log Out</a>
-                                {% else %}
-                                <a class="dropdown-item" href="{% url 'login' %}">Login</a>
-                                <a class="dropdown-item" href="{% url 'register' %}">Register</a>
-                                {% endif %}
-                            </div>
-                        </li>
-                    </ul>
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'index' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'about' %}">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'contact' %}">Contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'help' %}">Help</a>
+                    </li>
+                </ul>
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        {% if user.is_authenticated %}
+                        <i class="fas fa-user user-icon"></i>{{ user.username }}
+                        {% else %}
+                        Login to your Account
+                        {% endif %}
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        {% if user.is_authenticated %}
+                        <a class="dropdown-item" href="{% url 'edit_profile' %}">Edit/Delete Profile</a>
+                        <a class="dropdown-item" href="{% url 'trips' %}">Trips</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{% url 'logout' %}">Log Out</a>
+                        {% else %}
+                        <a class="dropdown-item" href="{% url 'login' %}">Login</a>
+                        <a class="dropdown-item" href="{% url 'register' %}">Register</a>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-        </nav>
-    </header>
+        </div>
+    </nav>
+</header>
     <div class="container mt-5">
         <div class="row">
             <div class="col-md-12">
-                <h1>Travel History</h1>
+                <h1>Trip History</h1>
                 <div class="table-container">
                     <table class="table table-striped">
                         <thead>

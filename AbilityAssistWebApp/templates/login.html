@@ -240,6 +240,7 @@
                             <div class="alert alert-danger" role="alert">
                                 You are already logged in. Please <a href="{% url 'logout' %}"
                                     class="alert-link">logout</a> to login with another account.
+                                Or <a href="{% url 'index' %}" class="alert-link">HERE</a> to go the home page
                             </div>
                             {% else %}
                             <form method="post" action="{% url 'login' %}">
@@ -248,7 +249,11 @@
                                     <label for="username">Username</label>
                                     <input type="text" class="form-control" id="username" name="username" required>
                                     {% if form.username.errors %}
-                                    <div class="error-message alert alert-danger mt-3" role="alert">{{ form.email.errors }}</div>
+                                    <div class="error-message alert alert-danger mt-3" role="alert">
+                                        {% for error in form.username.errors %}
+                                        {{ error }}
+                                        {% endfor %}
+                                    </div>
                                     {% endif %}
                                 </div>
 
@@ -256,9 +261,21 @@
                                     <label for="password">Password</label>
                                     <input type="password" class="form-control" id="password" name="password">
                                     {% if form.password.errors %}
-                                    <div class="error-message alert alert-danger mt-3" role="alert">{{ form.password.errors }}</div>
+                                    <div class="error-message alert alert-danger mt-3" role="alert">
+                                        {% for error in form.password.errors %}
+                                        {{ error }}
+                                        {% endfor %}
+                                    </div>
                                     {% endif %}
                                 </div>
+                                {% if messages %}
+                                    {% for message in messages %}
+                                        <div class="alert alert-danger mt-3" role="alert">{{ message }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                                {% if form.non_field_errors %}
+                                <div class="alert alert-danger mt-3" role="alert">Invalid username or password. Please try again.</div>
+                                {% endif %}
 
                                 <button type="submit" class="btn btn-primary btn-block">Login</button>
                             </form>
@@ -266,11 +283,6 @@
                                 <p>Don't have an account yet?</p>
                                 <a href="{% url 'register' %}" class="btn btn-link">Register here</a>
                             </div>
-                            {% if messages.success %}
-                            <div class="alert alert-danger mt-3" role="alert">
-                                {{ messages }}
-                            </div>
-                            {% endif %}
                             {% endif %}
                             <!-- Volunteer Login and Forgot Password Links -->
                             <div class="row">

@@ -67,7 +67,8 @@
         }
 
         .dropdown-item:hover {
-            background-color: #495057;
+             background-color: #ffc107;
+            color: #fff;
         }
 
         h1 {
@@ -146,7 +147,7 @@
                             <a class="nav-link" href="{% url 'contact' %}">Contact</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Help</a>
+                            <a class="nav-link" href="{% url 'help' %}">Help</a>
                         </li>
                     </ul>
                     <div class="nav-item dropdown ml-auto">
@@ -162,12 +163,8 @@
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                             {% if user.is_authenticated %}
-                            <a class="dropdown-item" href="{% url 'edit_profile' %}">Edit/Delete Volunteer
-                                Profile</a>
-                            <a class="dropdown-item" href="{% url 'travel_history' %}">Volunteer Assist
-                                History</a>
-                            <a class="dropdown-item" href="{% url 'saved_locations' %}">Assistive
-                                Resources</a>
+                            <a class="dropdown-item" href="{% url 'edit_profile' %}">Edit/Delete Profile</a>
+                            <a class="dropdown-item" href="{% url 'trips' %}">Trips</a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="{% url 'logout' %}">Log Out</a>
                             {% else %}

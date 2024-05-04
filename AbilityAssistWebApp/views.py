@@ -1,5 +1,4 @@
-from django.contrib.auth.forms import PasswordChangeForm
-from django.contrib.auth.models import User
+from django.contrib.auth.forms import PasswordChangeForm, AuthenticationForm
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
@@ -8,6 +7,11 @@ from .forms import RegistrationForm, LoginForm, EditUserForm
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.urls import reverse
+from django.http import JsonResponse
+
+from .models import Trip
+
+
 def index(request):
     return render(request, 'index.html')
 
@@ -38,10 +42,12 @@ def user_login(request):
                 return redirect('index')
             else:
                 # Invalid credentials, display error message
-                return render(request, 'login.html', {'form': form, 'error_message': 'Invalid username or password. Please try again.'})
+                messages.error(request, 'Invalid username or password. Please try again.')
+                return render(request, 'login.html', {'form': form})
         else:
             # Invalid form submission, display error message
-            return render(request, 'login.html', {'form': form, 'error_message': 'Invalid form submission. Please check your input.'})
+            messages.error(request, 'Invalid form submission. Please check your input.')
+            return render(request, 'login.html', {'form': form})
     else:
         form = LoginForm()
         return render(request, 'login.html', {'form': form})
@@ -63,6 +69,25 @@ def edit_profile(request):
     else:
         form = EditUserForm(instance=request.user)
     return render(request, 'edit_profile.html', {'form': form})
+
+def store_trip(request):
+    if request.method == "POST":
+        # Extract data from POST request
+        start_point = request.POST.get('start_point')
+        destination = request.POST.get('destination')
+
+        # Create new Trip object and save it to the database
+        trip = Trip.objects.create(
+            user=request.user,  # Assuming user is authenticated
+            start_point=start_point,
+            destination=destination
+        )
+
+        # Return success response
+        return JsonResponse({'message': 'Trip stored successfully!'})
+    else:
+        # Return error response if request method is not POST
+        return JsonResponse({'error': 'Invalid request method'}, status=400)
 
 
 def trips(request):
@@ -97,24 +122,29 @@ def contact(request):
 
 def admin_login(request):
     if request.method == 'POST':
-        form = LoginForm(request.POST)
+        form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
-            email = form.cleaned_data['email']
+            username = form.cleaned_data['username']
             password = form.cleaned_data['password']
-            user = authenticate(request, username=email, password=password)
-            if user is not None:
+            user = authenticate(request, username=username, password=password)
+            if user is not None and user.is_superuser:
+                print("User is a superuser.")
                 login(request, user)
-                return redirect('index')  # Assuming 'index' is a valid URL pattern name
+                return redirect('admin_dashboard')
             else:
-                messages.error(request, 'Invalid email or password. Please try again.')
+                messages.error(request, 'Invalid username or password. Please try again.')
         else:
             messages.error(request, 'Invalid form submission. Please check your input.')
     else:
-        form = LoginForm()
+        form = AuthenticationForm(request)
 
     return render(request, 'admin_login.html', {'form': form})
 
-
+def admin_dashboard(request):
+    if request.user.is_authenticated and request.user.is_superuser:
+        return redirect('/admin/')
+    else:
+        return redirect('admin_login')
 
 @login_required
 def reset_password(request):
@@ -122,11 +152,16 @@ def reset_password(request):
         form = PasswordChangeForm(request.user, request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Password changed successfully!')
-            return redirect('profile')
+            messages.success(request, 'Email containing the next steps have been sent!')
+            return redirect('change_password')
     else:
         form = PasswordChangeForm(request.user)
     return render(request, 'change_password.html', {'form': form})
+
+def help(request):
+    return render(request,'help.html')
+
+
 
 
 

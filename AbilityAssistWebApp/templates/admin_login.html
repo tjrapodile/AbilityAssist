@@ -211,9 +211,7 @@
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                             {% if user.is_authenticated %}
                             <a class="dropdown-item" href="{% url 'edit_profile' %}">Edit/Delete Profile</a>
-                            <a class="dropdown-item" href="{% url 'travel_history' %}">Trips</a>
-                            <a class="dropdown-item" href="{% url 'saved_locations' %}">Assistive
-                                Resources</a>
+                            <a class="dropdown-item" href="{% url 'trips' %}">Trips</a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="{% url 'logout' %}">Log Out</a>
                             {% else %}
@@ -246,10 +244,10 @@
                             <form method="post" action="{% url 'login' %}">
                                 {% csrf_token %}
                                 <div class="form-group">
-                                    <label for="email">Email</label>
-                                    <input type="email" class="form-control" id="email" name="email" required>
-                                    {% if form.email.errors %}
-                                    <div class="error-message alert alert-danger mt-3" role="alert">{{ form.email.errors }}</div>
+                                    <label for="username">Username</label>
+                                    <input type="text" class="form-control" id="username" name="username" required>
+                                    {% if form.username.errors %}
+                                    <div class="error-message alert alert-danger mt-3" role="alert">{{ form.username.errors }}</div>
                                     {% endif %}
                                 </div>
 
@@ -272,7 +270,7 @@
                             <!-- Forgot Password Link -->
                             <div class="text-right">
                                 <p class="mb-0">Forgot your password?</p>
-                                <a href="{% url 'password_reset' %}" class="forgot-password-link">Reset Password</a>
+                                <a href="{% url 'reset_password' %}" class="forgot-password-link">Reset Password</a>
                             </div>
                         </div>
                     </div>
