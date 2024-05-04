@@ -1,15 +1,19 @@
+import json
+
 from django.contrib.auth.forms import PasswordChangeForm, AuthenticationForm
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
+from django.views.decorators.csrf import csrf_exempt
+
 from .forms import RegistrationForm, LoginForm, EditUserForm
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.urls import reverse
 from django.http import JsonResponse
 
-from .models import Trip
+from .models import Trip,InitialGeolocation, FinalGeolocation
 
 
 def index(request):
@@ -90,8 +94,44 @@ def store_trip(request):
         return JsonResponse({'error': 'Invalid request method'}, status=400)
 
 
+@csrf_exempt  # Disable CSRF protection for this view for simplicity (use proper CSRF protection in production)
 def trips(request):
-    return render(request, 'trips.html')
+    print("executing trips in view")
+    if request.method == 'POST':
+        try:
+            # Parse JSON data from request body
+            json_data = json.loads(request.body)
+            print("here is the data from front end: " + json_data['finalPoint']['finalDestinationName'])
+
+            # Extract data from JSON and save it to the database
+
+            initialData = InitialGeolocation(
+                longitude=json_data['initialPoint']['longiTude'],
+                latitude=json_data['initialPoint']['latitude']
+            )
+            initialData.save()
+
+            finalData = FinalGeolocation(
+                value=json_data['finalPoint']['finalDestinationValue'],
+                destination_name=json_data['finalPoint']['finalDestinationName']
+            )
+            finalData.save()
+
+            trip = Trip(
+                start_point=initialData,
+                end_point=finalData
+            )
+            trip.save()
+
+            return JsonResponse({'message': 'Data saved successfully'}, status=201)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON format in request body'}, status=400)
+        except KeyError as e:
+            return JsonResponse({'error': f'Missing key in JSON data: {e}'}, status=400)
+    else:
+        return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
+
+
 
 def about(request):
     return render(request, 'about.html')

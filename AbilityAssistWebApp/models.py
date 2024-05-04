@@ -6,17 +6,20 @@ from django.contrib.auth.models import User
 
 class Trip(models.Model):
     user = models.ForeignKey(User, on_delete = models.CASCADE)
-    start_point = models.CharField(max_length = 100)
-    destination = models.ForeignKey('Geolocation',on_delete = models.CASCADE)
+    start_point = models.ForeignKey('InitialGeolocation',on_delete = models.CASCADE)
+    end_point = models.ForeignKey('FinalGeolocation',on_delete = models.CASCADE, null=True)
     date = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f'{self.start_point} to {self.destination}'
+    def _str_(self):
+        return f'{self.start_point} to {self.end_point}'
 
-class Geolocation(models.Model):
+class FinalGeolocation(models.Model):
+    value = models.CharField(max_length=50)
+    name = models.CharField(max_length = 100)
+
+class InitialGeolocation(models.Model):
     longitude = models.CharField(max_length=50)
-    latitude = models.CharField(max_length = 50)
-    destination_name = models.CharField(max_length = 100)
+    latitude = models.CharField(max_length=50)
 
 
 

@@ -494,8 +494,80 @@
           }
         }
 
+        function sendDataToBackend(){
+            const destinationValue = document.getElementById("destinationInput").value;
+            console.log("destination value is: "+destinationValue)
+
+            let finalValue = "";
+            let finalName = "";
+            if(destinationValue == "5G6CF34W+CM Soshanguve, South Africa"){
+                finalValue = "5G6CF34W+CM Soshanguve, South Africa";
+                finalName = "Main Gate";
+            }else if(destinationValue == "5G6CF35X+Q3 Soshanguve, South Africa"){
+                finalValue = "5G6CF34W+CM Soshanguve, South Africa";
+                finalName = "Small Main";
+            }else if(destinationValue == "5G6CF35W+V5 Soshanguve,  South Africa"){
+                finalValue = "5G6CF35W+V5 Soshanguve,  South Africa";
+                finalName = "Library";
+            }else if(destinationValue == "5G6CF36W+8F Soshanguve, South Africa"){
+                finalValue = "5G6CF36W+8F Soshanguve, South Africa";
+                finalName = "Building 13";
+            }else if(destinationValue == "F35W+Q3 Soshanguve, South Africa"){
+                finalValue = "F35W+Q3 Soshanguve, South Africa";
+                finalName = "One Stop Building";
+            }else if(destinationValue == "F35V+VX Soshanguve, South Africa"){
+                finalValue = "F35V+VX Soshanguve, South Africa";
+                finalName = "Male A& Female Resident Admin Building";
+            }else if(destinationValue == "5G6CF35W+Q7 Soshanguve, South Africa"){
+                finalValue = "5G6CF35W+Q7 Soshanguve, South Africa";
+                finalName = "Financial Aid Office";
+            }else if(destinationValue == "5G6CF35W+V6 Soshanguve, South Africa"){
+                finalValue = "5G6CF35W+V6 Soshanguve, South Africa";
+                finalName = "Information Center";
+            }else if(destinationValue == "5G6CF35W+F7 Soshanguve, South Africa"){
+                finalValue = "5G6CF35W+F7 Soshanguve, South Africa";
+                finalName = "Gymnasium";
+            }else if(destinationValue == "5G6CF34W+J5 Soshanguve, South Africa"){
+                finalValue = "5G6CF34W+J5 Soshanguve, South Africa";
+                finalName = "Student town resident admin";
+            }
+
+            //send trip data to backend
+            const tripJSON = {
+                               initialPoint: {latiTude: userLocation.lat, longiTude: userLocation.lng},
+                               finalPoint: {finalDestinationValue: finalValue, finalDestinationName: finalName}
+                             }
+            console.log("here is the object to be sent to backend"+tripJSON.initialPoint.latiTude+", "+tripJSON.finalPoint.latiTude+", "+tripJSON.finalPoint.longiTude);
+            const url = "http://127.0.0.1:8000/AbilityAssistWebApp/trips/";
+
+            const options = {
+                method: 'POST', // HTTP method
+                headers: {
+                    'Content-Type': 'application/json' // Specify that we are sending JSON data
+                },
+                body: JSON.stringify(tripJSON) // Convert JSON data to string before sending
+            };
+
+            // Make the fetch request
+            fetch(url, options)
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error('Network response was not ok');
+                }
+                return response.json(); // Parse the JSON response from the backend
+              })
+              .then(data => {
+                console.log('Response from backend:', data); // Handle the response from the backend
+              })
+              .catch(error => {
+                console.error('Error:', error); // Handle any errors that occur during the fetch request
+                });
+        }
+
 
         function calculateRoute(origin, destination) {
+            //send data to back end first
+            sendDataToBackend();
             const directionsService = new google.maps.DirectionsService();
             const directionsRenderer = new google.maps.DirectionsRenderer();
             directionsRenderer.setMap(map);
