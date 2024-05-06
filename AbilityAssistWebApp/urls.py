@@ -14,9 +14,8 @@ urlpatterns = [
     path('logout/', views.user_logout, name='logout'),
     path('edit_profile/', views.edit_profile, name='edit_profile'),
     path('help/', views.help, name='help'),
-    path('trips/', views.trips, name='store_trip'),
     path('admin_dashboard/', views.admin_dashboard, name='admin_dashboard'),
-    path('admin/', admin.site.urls),
+    path('admin_page/', admin.site.urls),
 
 
 
