@@ -66,8 +66,7 @@
         }
 
         .dropdown-item:hover {
-            background-color: #ffc107;
-            color: #fff;
+            background-color: #495057;
         }
 
         h1 {
@@ -107,6 +106,22 @@
             border-color: #e0a800;
         }
 
+        .btn-deactivate {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: #fff;
+            border-radius: 25px;
+            font-weight: 600;
+            text-transform: uppercase;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-deactivate:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+
+
         .user-icon {
             margin-right: 5px;
         }
@@ -119,6 +134,63 @@
             max-width: 400px;
             margin: auto;
             margin-bottom: 100px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            border-radius: 5px;
+            width: 60%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+            /* Button styles */
+        .modal-buttons {
+            text-align: center;
+        }
+
+        .modal-buttons button {
+            margin: 10px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #confirmBtn {
+            background-color: #f44336;
+            color: white;
+        }
+
+        #cancelBtn {
+            background-color: #ffffff;
+            color: black;
         }
     </style>
 </head>
@@ -145,7 +217,7 @@
                         <a class="nav-link" href="{% url 'contact' %}">Contact</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'help' %}">Help</a>
+                        <a class="nav-link" href="#">Help</a>
                     </li>
                 </ul>
                 <div class="nav-item dropdown ml-auto">
@@ -201,6 +273,18 @@
                     {% endif %}
                 </div>
                 <button type="submit" class="btn btn-primary">Save Changes</button>
+                <button type="button" class="btn btn-deactivate" id="deactivateBtn">Deactivate/Delete Your Profile</button>
+
+                <div id="confirmationModal" class="modal">
+                    <div class="modal-content">
+                      <span class="close">&times;</span>
+                      <p>Are you sure you want to deactivate your account?</p>
+                      <div class="modal-buttons">
+                        <button id="confirmBtn">Yes</button>
+                        <button id="cancelBtn">No</button>
+                      </div>
+                    </div>
+                  </div>
             </form>
         </div>
     </div>
@@ -216,6 +300,77 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    var modal = document.getElementById("confirmationModal");
 
+    // Get the <span> element that closes the modal
+    var closeBtn = document.getElementsByClassName("close")[0];
+
+    // Get the buttons for confirmation and cancellation
+    var confirmBtn = document.getElementById("confirmBtn");
+    var cancelBtn = document.getElementById("cancelBtn");
+
+    // When the user clicks the button, open the modal
+    document.getElementById("deactivateBtn").addEventListener("click", function() {
+      modal.style.display = "block";
+    });
+
+    // When the user clicks on <span> (x), close the modal
+    closeBtn.onclick = function() {
+      modal.style.display = "none";
+    };
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    };
+
+    // When the user clicks the confirm button, proceed with deactivation
+    confirmBtn.onclick = function() {
+      // Send AJAX request to deactivate the user
+      // Update the user interface accordingly
+      var xhr = new XMLHttpRequest();
+            xhr.open("POST", "{% url 'deactivate_user' %}", true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    // User deactivated successfully, log out
+                    window.location.href = "{% url 'login' %}";
+                } else {
+                    // Error deactivating user
+                    alert("Error deactivating user. Please try again later.");
+                }
+            };
+            xhr.onerror = function() {
+                // Connection error
+                alert("Failed to connect to the server. Please check your internet connection.");
+            };
+            xhr.send();
+    };
+
+    // When the user clicks the cancel button, close the modal
+    cancelBtn.onclick = function() {
+      modal.style.display = "none";
+    };
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                // Check if the cookie contains the name we're looking for
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    // Extract and decode the cookie value
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
 </body>
 </html>

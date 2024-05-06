@@ -270,7 +270,7 @@
                                 </div>
                                 {% if messages %}
                                     {% for message in messages %}
-                                        <div class="alert alert-danger mt-3" role="alert">{{ message }}</div>
+                                        <div class="alert alert-danger mt-3" role="alert">{{ message|safe}}</div>
                                     {% endfor %}
                                 {% endif %}
                                 {% if form.non_field_errors %}

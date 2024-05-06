@@ -16,6 +16,8 @@ urlpatterns = [
     path('help/', views.help, name='help'),
     path('admin_dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('admin_page/', admin.site.urls),
+    path('deactivate/', views.deactivate_user, name='deactivate_user'),
+
 
 
 

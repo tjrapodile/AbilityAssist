@@ -46,7 +46,7 @@ def user_login(request):
                 return redirect('index')
             else:
                 # Invalid credentials, display error message
-                messages.error(request, 'Invalid username or password. Please try again.')
+                messages.error(request, 'Invalid username or password. Please try again. (If you have deactivated your account, please contact <a href="mailto:Abilityassistcompany@gmail.com">Abilityassistcompany@gmail.com</a> if you wish to re-activate it)')
                 return render(request, 'login.html', {'form': form})
         else:
             # Invalid form submission, display error message
@@ -73,6 +73,18 @@ def edit_profile(request):
     else:
         form = EditUserForm(instance=request.user)
     return render(request, 'edit_profile.html', {'form': form})
+
+@login_required
+def deactivate_user(request):
+    if request.method == "POST":
+        user = request.user
+        user.is_active = False  # Mark the user as inactive
+        user.save()
+        user_logout(request)
+        # Redirect the user to the login page
+        return redirect('login')
+    else:
+        return JsonResponse({"error": "Invalid request method"}, status=400)
 
 def store_trip(request):
     if request.method == "POST":
@@ -128,8 +140,11 @@ def trips(request):
             return JsonResponse({'error': 'Invalid JSON format in request body'}, status=400)
         except KeyError as e:
             return JsonResponse({'error': f'Missing key in JSON data: {e}'}, status=400)
+    elif request.method == 'GET':
+        travel_entries = Trip.objects.all()
+        return render(request, 'trips.html', {'travel_entries': travel_entries})
     else:
-        return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
+        return JsonResponse({'error': 'Only GET and POST requests are allowed'}, status=405)
 
 
 
