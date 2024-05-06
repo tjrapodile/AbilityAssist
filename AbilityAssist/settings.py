@@ -88,11 +88,11 @@ DATABASES = {
 }
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'  # SMTP server address
-EMAIL_PORT = 587  # SMTP server port (typically 587 for TLS)
-EMAIL_USE_TLS = True  # Set to True if your SMTP server requires TLS/SSL
-EMAIL_HOST_USER = 'abilityassistcompany@gmail.com'  # Your email address for sending emails
-EMAIL_HOST_PASSWORD = 'password123!@*'  # Your email account password
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'abilityassistbest@gmail.com'  # Your Gmail address
+EMAIL_HOST_PASSWORD = 'qdcvziobfxpeulvn'  #
 
 
 AUTHENTICATION_BACKENDS = [

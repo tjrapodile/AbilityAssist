@@ -89,14 +89,28 @@ def deactivate_user(request):
 def store_trip(request):
     if request.method == "POST":
         # Extract data from POST request
-        start_point = request.POST.get('start_point')
-        destination = request.POST.get('destination')
+        initial_point_latitude = request.POST.get('initialPoint[latitude]')
+        initial_point_longitude = request.POST.get('initialPoint[longitude]')
+        final_destination_value = request.POST.get('finalPoint[finalDestinationValue]')
+        final_destination_name = request.POST.get('finalPoint[finalDestinationName]')
+
+        # Create new InitialGeolocation instance for start_point
+        start_point_instance = InitialGeolocation.objects.create(
+            latitude=initial_point_latitude,
+            longitude=initial_point_longitude
+        )
+
+        # Find or create FinalGeolocation instance for destination
+        end_point_instance, created = FinalGeolocation.objects.get_or_create(
+            value=final_destination_value,
+            name=final_destination_name
+        )
 
         # Create new Trip object and save it to the database
         trip = Trip.objects.create(
             user=request.user,  # Assuming user is authenticated
-            start_point=start_point,
-            destination=destination
+            start_point=start_point_instance,
+            end_point=end_point_instance
         )
 
         # Return success response
@@ -104,6 +118,7 @@ def store_trip(request):
     else:
         # Return error response if request method is not POST
         return JsonResponse({'error': 'Invalid request method'}, status=400)
+
 
 
 @csrf_exempt  # Disable CSRF protection for this view for simplicity (use proper CSRF protection in production)
@@ -153,25 +168,7 @@ def about(request):
 
 def contact(request):
     if request.method == 'POST':
-        name = request.POST.get('name')
-        email = request.POST.get('email')
-        message = request.POST.get('message')
-
-        if not name or not email or not message:
-            messages.error(request, 'Please fill in all fields.')
-            return redirect('contact')
-
-        send_mail(
-            'New message from AbilityAssist contact form',
-            f'Name: {name}\nEmail: {email}\nMessage: {message}',
-            'abilityassistcompany@gmail.com',
-            ['abilityassistcompany@gmail.com'],
-            fail_silently=False,
-        )
-
-        messages.success(request, 'Your message has been sent successfully.')
-        return redirect(reverse('contact'))
-
+        pass
     return render(request, 'contact.html')
 
 
@@ -179,13 +176,14 @@ def admin_login(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
+            print("Admin login view accessed.")
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
             user = authenticate(request, username=username, password=password)
-            if user is not None and user.is_superuser:
+            if user is not None and user.is_staff:
                 print("User is a superuser.")
                 login(request, user)
-                return redirect('admin_dashboard')
+                return redirect('/admin/')
             else:
                 messages.error(request, 'Invalid username or password. Please try again.')
         else:
@@ -196,22 +194,11 @@ def admin_login(request):
     return render(request, 'admin_login.html', {'form': form})
 
 def admin_dashboard(request):
+    print("Admin dashboard view accessed.")
     if request.user.is_authenticated and request.user.is_superuser:
-        return redirect('/admin/')
+        return redirect('admin:index')  # Redirect to the Django admin index page
     else:
         return redirect('admin_login')
-
-@login_required
-def reset_password(request):
-    if request.method == 'POST':
-        form = PasswordChangeForm(request.user, request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Email containing the next steps have been sent!')
-            return redirect('change_password')
-    else:
-        form = PasswordChangeForm(request.user)
-    return render(request, 'change_password.html', {'form': form})
 
 def help(request):
     return render(request,'help.html')

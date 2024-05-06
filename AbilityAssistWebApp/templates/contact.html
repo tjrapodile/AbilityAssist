@@ -196,7 +196,7 @@
                         <label for="message">Your Message:</label>
                         <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary">Send Message</button>
+                    <a href="#" id="send-email-link" class="btn btn-primary">Send Message</a>
                 </form>
                 <div id="successMessage" class="alert alert-success mt-3" role="alert" style="display: none;">
                     Email successfully sent!
@@ -224,6 +224,19 @@
                 document.getElementById('successMessage').style.display = 'block';
             }
         });
+    </script>
+<script>
+    document.getElementById('send-email-link').addEventListener('click', function() {
+        var name = document.getElementById('name').value;
+        var email = document.getElementById('email').value;
+        var message = document.getElementById('message').value;
+
+        var subject = encodeURIComponent('New message from AbilityAssist contact form');
+        var body = encodeURIComponent('Name: ' + name + '\nEmail: ' + email + '\nMessage: ' + message);
+        var mailtoLink = 'mailto:Abilityassistcompany@email.com?subject=' + subject + '&body=' + body;
+
+        window.location.href = mailtoLink;
+    });
     </script>
 </body>
 

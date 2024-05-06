@@ -241,7 +241,7 @@
                                     class="alert-link">logout</a> to login with another account.
                             </div>
                             {% else %}
-                            <form method="post" action="{% url 'login' %}">
+                            <form method="post" action="{% url 'login' %}?next={{ request.GET.next }}">
                                 {% csrf_token %}
                                 <div class="form-group">
                                     <label for="username">Username</label>
