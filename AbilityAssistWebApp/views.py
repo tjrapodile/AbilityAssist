@@ -42,6 +42,9 @@ def user_login(request):
             password = form.cleaned_data['password']
             user = authenticate(request, username=username, password=password)
             if user is not None:
+                if user.is_staff:
+                    login(request,user)
+                    return redirect(reverse('admin:index'))
                 login(request, user)
                 return redirect('index')
             else:
@@ -85,7 +88,7 @@ def deactivate_user(request):
         return redirect('login')
     else:
         return JsonResponse({"error": "Invalid request method"}, status=400)
-
+@csrf_exempt
 def store_trip(request):
     if request.method == "POST":
         # Extract data from POST request
@@ -113,54 +116,22 @@ def store_trip(request):
             end_point=end_point_instance
         )
 
-        # Return success response
-        return JsonResponse({'message': 'Trip stored successfully!'})
+        # Redirect the user back to the index page after successfully storing the trip
+        return redirect('index')
     else:
         # Return error response if request method is not POST
         return JsonResponse({'error': 'Invalid request method'}, status=400)
 
 
 
-@csrf_exempt  # Disable CSRF protection for this view for simplicity (use proper CSRF protection in production)
+@login_required
 def trips(request):
-    print("executing trips in view")
-    if request.method == 'POST':
-        try:
-            # Parse JSON data from request body
-            json_data = json.loads(request.body)
-            print("here is the data from front end: " + json_data['finalPoint']['finalDestinationName'])
-
-            # Extract data from JSON and save it to the database
-
-            initialData = InitialGeolocation(
-                longitude=json_data['initialPoint']['longiTude'],
-                latitude=json_data['initialPoint']['latitude']
-            )
-            initialData.save()
-
-            finalData = FinalGeolocation(
-                value=json_data['finalPoint']['finalDestinationValue'],
-                destination_name=json_data['finalPoint']['finalDestinationName']
-            )
-            finalData.save()
-
-            trip = Trip(
-                start_point=initialData,
-                end_point=finalData
-            )
-            trip.save()
-
-            return JsonResponse({'message': 'Data saved successfully'}, status=201)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON format in request body'}, status=400)
-        except KeyError as e:
-            return JsonResponse({'error': f'Missing key in JSON data: {e}'}, status=400)
-    elif request.method == 'GET':
-        travel_entries = Trip.objects.all()
+    if request.method == 'GET':
+        # Filter trips based on the logged-in user
+        travel_entries = Trip.objects.filter(user=request.user)
         return render(request, 'trips.html', {'travel_entries': travel_entries})
     else:
-        return JsonResponse({'error': 'Only GET and POST requests are allowed'}, status=405)
-
+        return JsonResponse({'error': 'Only GET requests are allowed for displaying trip data'}, status=405)
 
 
 def about(request):
@@ -171,34 +142,6 @@ def contact(request):
         pass
     return render(request, 'contact.html')
 
-
-def admin_login(request):
-    if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            print("Admin login view accessed.")
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password']
-            user = authenticate(request, username=username, password=password)
-            if user is not None and user.is_staff:
-                print("User is a superuser.")
-                login(request, user)
-                return redirect('/admin/')
-            else:
-                messages.error(request, 'Invalid username or password. Please try again.')
-        else:
-            messages.error(request, 'Invalid form submission. Please check your input.')
-    else:
-        form = AuthenticationForm(request)
-
-    return render(request, 'admin_login.html', {'form': form})
-
-def admin_dashboard(request):
-    print("Admin dashboard view accessed.")
-    if request.user.is_authenticated and request.user.is_superuser:
-        return redirect('admin:index')  # Redirect to the Django admin index page
-    else:
-        return redirect('admin_login')
 
 def help(request):
     return render(request,'help.html')
