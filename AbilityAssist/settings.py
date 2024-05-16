@@ -84,7 +84,6 @@ DATABASES = {
         'PASSWORD': 'lyMgD0YdTswnLFWEfx7M0yKr9fTvjX4W',
         'HOST': 'flora.db.elephantsql.com',
         'PORT': '5432',
-        'URL': 'postgres://kpfjzjpo:lyMgD0YdTswnLFWEfx7M0yKr9fTvjX4W@flora.db.elephantsql.com/kpfjzjpo'
     }
 }
 
