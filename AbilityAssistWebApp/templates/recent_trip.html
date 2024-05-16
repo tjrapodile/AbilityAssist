@@ -239,62 +239,47 @@
     <div class="container mt-5">
         <div class="row">
             <div class="col-md-12">
-                <h1>Trip History</h1>
-                <form method="get" action="{% url 'trips' %}" class="form-inline mb-3">
-                    <input type="text" class="form-control mr-sm-2" id="search" name="search" placeholder="Search by destination or date" value="{{ search_query }}">
-                    <button type="submit" class="btn btn-primary mr-sm-2">Search</button>
-                    <a href="{% url 'trips_pdf' %}" class="btn btn-secondary">Download PDF</a>
+                <h1>Most Recent Trip</h1>
+                <form method="get" action="{% url 'recent_trip' %}" class="form-inline mb-3">
+                    <input type="hidden" name="pdf" value="true">
+                    <button type="submit" class="btn btn-secondary">Download PDF</button>
                 </form>
                 <div class="table-container">
                     <table class="table table-striped">
-                        <<thead>
+                        <thead>
                             <tr>
                                 <th>#</th>
                                 <th>Start Location</th>
                                 <th>Destination</th>
                                 <th>Date</th>
-                                <th>Cancelled</th> <!-- New column for cancelled status -->
+                                <th>Cancelled</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for travel_entry in travel_entries %}
+                            {% if latest_trip %}
                             <tr>
-                                <td>{{ travel_entry.id }}</td>
-                                <td>{{ travel_entry.start_point.latitude }}, {{ travel_entry.start_point.longitude }}</td>
-                                <td>{{ travel_entry.end_point.name }}</td>
-                                <td>{{ travel_entry.date|date:"Y-m-d H:i:s" }}</td>
-                                <td>{{ travel_entry.cancelled|yesno:"Yes,No" }}</td> <!-- Display cancelled status -->
+                                <td>{{ latest_trip.id }}</td>
+                                <td>{{ latest_trip.start_point.latitude }}, {{ latest_trip.start_point.longitude }}</td>
+                                <td>{{ latest_trip.end_point.name }}</td>
+                                <td>{{ latest_trip.date|date:"Y-m-d H:i:s" }}</td>
+                                <td>{{ latest_trip.cancelled|yesno:"Yes,No" }}</td>
                             </tr>
-                            {% empty %}
+                            {% else %}
                             <tr>
-                                <td colspan="5">No trips found.</td>
+                                <td colspan="5">No recent trips found.</td>
                             </tr>
-                            {% endfor %}
+                            {% endif %}
                         </tbody>
                     </table>
-                </div>
-                <!-- Pagination Links -->
-                <div class="pagination">
-                    <span class="step-links">
-                        {% if travel_entries.has_previous %}
-                            <a href="?page=1&search={{ search_query }}">first</a>
-                            <a href="?page={{ travel_entries.previous_page_number }}&search={{ search_query }}">previous</a>
-                        {% endif %}
-                        <span class="current">
-                            Page {{ travel_entries.number }} of {{ travel_entries.paginator.num_pages }}.
-                        </span>
-                        {% if travel_entries.has_next %}
-                            <a href="?page={{ travel_entries.next_page_number }}&search={{ search_query }}">next</a>
-                            <a href="?page={{ travel_entries.paginator.num_pages }}&search={{ search_query }}">last</a>
-                        {% endif %}
-                    </span>
                 </div>
             </div>
         </div>
     </div>
 
     <footer>
-        <!-- Footer Code Here -->
+        <div class="container">
+            <p>&copy; 2024 AbilityAssist. All rights reserved.</p>
+        </div>
     </footer>
 
     <!-- Bootstrap JS -->

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-
+{% csrf_token %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -149,6 +149,14 @@
             }
         }
 
+        .about-image-wrapper img {
+            width: 100%; /* Make the image width match its container */
+            height: 400px; /* Set the height to 200px */
+            object-fit: cover; /* Maintain aspect ratio without stretching */
+            display: block; /* Remove inline-element margin */
+            margin: auto; /* Center the image if needed */
+        }
+
     </style>
 </head>
 
@@ -189,7 +197,9 @@
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         {% if user.is_authenticated %}
                         <a class="dropdown-item" href="{% url 'edit_profile' %}">Edit/Delete Profile</a>
-                        <a class="dropdown-item" href="{% url 'trips' %}">Trips</a>
+                        <a class="dropdown-item" href="{% url 'trips' %}">Your Trips</a>
+                        <a class="dropdown-item" href="{% url 'recent_trip' %}">Get Recent Trip Details</a>
+                        <a class="dropdown-item" href="{% url 'user_stats' %}">User Trips Leaderboard</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{% url 'logout' %}">Log Out</a>
                         {% else %}
@@ -207,6 +217,9 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="about-content">
+                <div class="about-image-wrapper">
+                    <img src="{{ aboutImage.imageURL }}" alt="{{ aboutImage.title }}">
+                </div>
                 <h1 class="about-heading">About AbilityAssist</h1>
                 <p>The objective of AbilityAssist is to provide comprehensive assistance to individuals living with visual impairment at Tshwane University of Technology South Campus. We aim to empower users by employing cutting-edge sound detection technology, obstacle identification features, and voice-over assistance to guide them seamlessly throughout the campus. Additionally, AbilityAssist calculates distances for accurate arrival times to destinations, ensuring efficient navigation for users.</p>
                 <p>We believe that everyone, regardless of their abilities, should have equal access to opportunities and resources. That's why we work tirelessly to develop innovative solutions that improve the lives of people with disabilities.</p>

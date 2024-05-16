@@ -3,87 +3,61 @@
 */
 
 /* VARIABLE DEFINITIONS */
+/* VARIABLE DEFINITIONS */
 html[data-theme="light"],
 :root {
-    --primary: #79aec8;
-    --secondary: #417690;
-    --accent: #f5dd5d;
-    --primary-fg: #fff;
+    --primary: #ffc107; /* primary color for buttons and links */
+    --secondary: #343a40; /* secondary color for header and footer */
+    --accent: #dc3545; /* accent color for errors and delete buttons */
+    --primary-fg: #fff; /* primary foreground color for text on colored backgrounds */
 
-    --body-fg: #333;
-    --body-bg: #fff;
-    --body-quiet-color: #666;
-    --body-loud-color: #000;
+    --body-fg: #e7e7e7; /* body text color */
+    --body-bg: #2c2c2c; /* main body background color */
+    --body-quiet-color: #a9b1b7; /* color for less prominent text */
+    --body-loud-color: #ffffff; /* color for important text (like errors) */
 
-    --header-color: #ffc;
-    --header-branding-color: var(--accent);
-    --header-bg: var(--secondary);
-    --header-link-color: var(--primary-fg);
+    --header-color: #ffc107; /* color for text in the header */
+    --header-branding-color: var(--primary); /* color for branding text */
+    --header-bg: var(--secondary); /* background color for the header */
+    --header-link-color: var(--primary-fg); /* color for links in the header */
 
-    --breadcrumbs-fg: #c4dce8;
-    --breadcrumbs-link-fg: var(--body-bg);
-    --breadcrumbs-bg: #264b5d;
+    --breadcrumbs-fg: #e7e7e7; /* color for breadcrumb text */
+    --breadcrumbs-link-fg: var(--primary); /* color for breadcrumb links */
+    --breadcrumbs-bg: #1b1b1b; /* background color for breadcrumbs */
 
-    --link-fg: #417893;
-    --link-hover-color: #036;
-    --link-selected-fg: var(--secondary);
+    --link-fg: var(--primary); /* color for links */
+    --link-hover-color: #e0a800; /* color for links when hovered */
+    --link-selected-fg: var(--secondary); /* color for selected links */
 
-    --hairline-color: #e8e8e8;
-    --border-color: #ccc;
+    --hairline-color: #3c3c3c; /* color for light borders and dividers */
+    --border-color: #4c4c4c; /* color for borders */
 
-    --error-fg: #ba2121;
+    --error-fg: var(--accent); /* color for error messages and icons */
 
-    --message-success-bg: #dfd;
-    --message-warning-bg: #ffc;
-    --message-error-bg: #ffefef;
+    --message-success-bg: #1e7e34; /* background color for success messages */
+    --message-warning-bg: #856404; /* background color for warning messages */
+    --message-error-bg: var(--accent); /* background color for error messages */
 
-    --darkened-bg: #f8f8f8; /* A bit darker than --body-bg */
-    --selected-bg: #e4e4e4; /* E.g. selected table cells */
-    --selected-row: #ffc;
+    --darkened-bg: #242424; /* background for elements that need to stand out slightly */
+    --selected-bg: #1e1e1e; /* background color for selected table cells */
+    --selected-row: #ffc107; /* background color for selected rows */
 
-    --button-fg: #fff;
-    --button-bg: var(--secondary);
-    --button-hover-bg: #205067;
-    --default-button-bg: #205067;
-    --default-button-hover-bg: var(--secondary);
-    --close-button-bg: #747474;
-    --close-button-hover-bg: #333;
-    --delete-button-bg: #ba2121;
-    --delete-button-hover-bg: #a41515;
+    --button-fg: #fff; /* text color for buttons */
+    --button-bg: var(--primary); /* background color for buttons */
+    --button-hover-bg: #e0a800; /* background color for buttons when hovered */
+    --default-button-bg: var(--secondary); /* background color for default buttons */
+    --default-button-hover-bg: #1c1c1c; /* background color for default buttons when hovered */
+    --close-button-bg: #747474; /* background color for close buttons */
+    --close-button-hover-bg: #333; /* background color for close buttons when hovered */
+    --delete-button-bg: var(--accent); /* background color for delete buttons */
+    --delete-button-hover-bg: #a41515; /* background color for delete buttons when hovered */
 
-    --object-tools-fg: var(--button-fg);
-    --object-tools-bg: var(--close-button-bg);
-    --object-tools-hover-bg: var(--close-button-hover-bg);
+    --object-tools-fg: var(--button-fg); /* text color for object tools */
+    --object-tools-bg: var(--close-button-bg); /* background color for object tools */
+    --object-tools-hover-bg: var(--close-button-hover-bg); /* background color for object tools when hovered */
 
-    --font-family-primary:
-        "Segoe UI",
-        system-ui,
-        Roboto,
-        "Helvetica Neue",
-        Arial,
-        sans-serif,
-        "Apple Color Emoji",
-        "Segoe UI Emoji",
-        "Segoe UI Symbol",
-        "Noto Color Emoji";
-    --font-family-monospace:
-        ui-monospace,
-        Menlo,
-        Monaco,
-        "Cascadia Mono",
-        "Segoe UI Mono",
-        "Roboto Mono",
-        "Oxygen Mono",
-        "Ubuntu Monospace",
-        "Source Code Pro",
-        "Fira Mono",
-        "Droid Sans Mono",
-        "Courier New",
-        monospace,
-        "Apple Color Emoji",
-        "Segoe UI Emoji",
-        "Segoe UI Symbol",
-        "Noto Color Emoji";
+    --font-family-primary: 'Poppins', sans-serif; /* font family from index.html */
+    --font-family-monospace: 'Fira Code', monospace; /* font family for code */
 }
 
 html, body {

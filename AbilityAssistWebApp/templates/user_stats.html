@@ -239,53 +239,53 @@
     <div class="container mt-5">
         <div class="row">
             <div class="col-md-12">
-                <h1>Trip History</h1>
-                <form method="get" action="{% url 'trips' %}" class="form-inline mb-3">
-                    <input type="text" class="form-control mr-sm-2" id="search" name="search" placeholder="Search by destination or date" value="{{ search_query }}">
-                    <button type="submit" class="btn btn-primary mr-sm-2">Search</button>
-                    <a href="{% url 'trips_pdf' %}" class="btn btn-secondary">Download PDF</a>
+                <h1>Users Trips leaderboard</h1>
+                <form method="get" action="{% url 'user_stats' %}" class="form-inline mb-3">
+                    <input type="hidden" name="pdf" value="true">
+                    <button type="submit" class="btn btn-secondary">Download PDF</button>
+                </form>
+                <form method="get" class="form-inline mb-3">
+                    <input type="text" name="search" value="{{ search_query }}" class="form-control mr-sm-2" placeholder="Search position...">
+                    <button type="submit" class="btn btn-outline-success my-2 my-sm-0">Search For Pos. Number</button>
                 </form>
                 <div class="table-container">
                     <table class="table table-striped">
-                        <<thead>
+                        <thead>
                             <tr>
-                                <th>#</th>
-                                <th>Start Location</th>
-                                <th>Destination</th>
-                                <th>Date</th>
-                                <th>Cancelled</th> <!-- New column for cancelled status -->
+                                <th>Position</th>
+                                <th>Username</th>
+                                <th>Number of Trips</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for travel_entry in travel_entries %}
+                            {% for user_stat in user_stats %}
                             <tr>
-                                <td>{{ travel_entry.id }}</td>
-                                <td>{{ travel_entry.start_point.latitude }}, {{ travel_entry.start_point.longitude }}</td>
-                                <td>{{ travel_entry.end_point.name }}</td>
-                                <td>{{ travel_entry.date|date:"Y-m-d H:i:s" }}</td>
-                                <td>{{ travel_entry.cancelled|yesno:"Yes,No" }}</td> <!-- Display cancelled status -->
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ user_stat.username }}</td>
+                                <td>{{ user_stat.trip_count }}</td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="5">No trips found.</td>
+                                <td colspan="3">No user statistics found.</td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
-                <!-- Pagination Links -->
                 <div class="pagination">
                     <span class="step-links">
-                        {% if travel_entries.has_previous %}
-                            <a href="?page=1&search={{ search_query }}">first</a>
-                            <a href="?page={{ travel_entries.previous_page_number }}&search={{ search_query }}">previous</a>
+                        {% if user_stats.has_previous %}
+                            <a href="?page=1">&laquo; first</a>
+                            <a href="?page={{ user_stats.previous_page_number }}">previous</a>
                         {% endif %}
+
                         <span class="current">
-                            Page {{ travel_entries.number }} of {{ travel_entries.paginator.num_pages }}.
+                            Page {{ user_stats.number }} of {{ user_stats.paginator.num_pages }}.
                         </span>
-                        {% if travel_entries.has_next %}
-                            <a href="?page={{ travel_entries.next_page_number }}&search={{ search_query }}">next</a>
-                            <a href="?page={{ travel_entries.paginator.num_pages }}&search={{ search_query }}">last</a>
+
+                        {% if user_stats.has_next %}
+                            <a href="?page={{ user_stats.next_page_number }}">next</a>
+                            <a href="?page={{ user_stats.paginator.num_pages }}">last &raquo;</a>
                         {% endif %}
                     </span>
                 </div>
@@ -294,7 +294,9 @@
     </div>
 
     <footer>
-        <!-- Footer Code Here -->
+        <div class="container">
+            <p>&copy; 2024 AbilityAssist. All rights reserved.</p>
+        </div>
     </footer>
 
     <!-- Bootstrap JS -->

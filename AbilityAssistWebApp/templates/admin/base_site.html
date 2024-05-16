@@ -1,0 +1,44 @@
+{% extends "admin/base_site.html" %}
+{% load static i18n %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/custom_admin.css' %}"> <!-- Path to your custom CSS -->
+<style>
+/* You can also include the style from your index.html directly here or in the custom_admin.css file */
+</style>
+{% endblock %}
+
+{% block branding %}
+<a href="{% url 'admin:index' %}" class="navbar-brand">
+    <img src="/staticfiles/abilityassist.png" alt="{% trans 'Logo' %}" height="45" width="50">
+    AbilityAssist Administration Page
+</a>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block breadcrumbs %}
+<nav aria-label="{% translate 'Breadcrumbs' %}" class="breadcrumb">
+    <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+    {% if title %} &rsaquo; {{ title }}{% endif %}
+</nav>
+{% endblock %}
+
+{% block footer %}
+<footer>
+    <div class="container">
+        <p>&copy; 2024 AbilityAssist. All rights reserved.</p>
+    </div>
+</footer>
+{% endblock %}
+
+{% block extrahead %}
+<!-- Add any additional head elements here, such as scripts or meta tags -->
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} my-custom-admin-class{% endblock %}

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-
+{% csrf_token %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -278,7 +278,9 @@
                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                             {% if user.is_authenticated %}
                                 <a class="dropdown-item" href="{% url 'edit_profile' %}">Edit/Delete Profile</a>
-                                <a class="dropdown-item" href="{% url 'trips' %}">Trips</a>
+                                <a class="dropdown-item" href="{% url 'trips' %}">Your Trips</a>
+                                <a class="dropdown-item" href="{% url 'recent_trip' %}">Get Recent Trip Details</a>
+                                <a class="dropdown-item" href="{% url 'user_stats' %}">User Trips Leaderboard</a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="{% url 'logout' %}">Log Out</a>
                             {% else %}
@@ -315,7 +317,7 @@
                             <option value="5G6CF34W+J5 Soshanguve, South Africa">Student town resident admin</option>
                         </select>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" id="button-container">
                         <button type="submit" class="btn btn-primary">Calculate Route</button>
                     </div>
                 </form>
@@ -330,6 +332,47 @@
                         <span class="fas fa-exclamation-circle"></span>
                         Emergency
                     </button>
+                </div>
+                <div class="modal" id="chatModal" tabindex="-1" role="dialog" aria-labelledby="chatModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="chatModalLabel">Chat Functionality</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                Chat functionality being worked on, Will be functioning in the final presentation.
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emergency Modal -->
+                <div class="modal" id="emergencyModal" tabindex="-1" role="dialog" aria-labelledby="emergencyModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="emergencyModalLabel">Emergency Information</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                Please call Mbombela at <a href="tel:+27137453670">(013)745-3670, 143</a> for Campus Protection Services assistance.
+                                <div class="modal-phone-number">
+                                    Or <a href="tel:+27119589085">(011)958-9085</a> for Medical Emergencies and assistance.
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -346,9 +389,30 @@
             </div>
         </footer>
     </div>
+    <!-- Notification Modal -->
+    <div class="modal fade" id="notificationModal" tabindex="-1" role="dialog" aria-labelledby="notificationModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header" style="background-color: #ffc107;">
+            <h5 class="modal-title" id="notificationModalLabel">Notification</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body" id="notificationModalBody">
+            <!-- Notification message will be injected here -->
+          </div>
+          <div class="modal-footer" style="background-color: #e7f1f7;">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <script>
         var userLocation;
         var map;
+        var currentTripId = null;
+        var directionsRenderer;
         var tutSouthCampusBounds = {
             north: -25.5372,
             south: -25.5444,
@@ -369,6 +433,9 @@
                     },
                 gestureHandling: 'cooperative' // Allow map panning within bounds
             });
+
+            directionsRenderer = new google.maps.DirectionsRenderer();
+            directionsRenderer.setMap(map);
 
              // Get user's current location
             if (navigator.geolocation) {
@@ -463,19 +530,19 @@
 
         function setMarkers(map) {
           const image = {
-            url: "https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png",
+            url: "https://maps.google.com/mapfiles/kml/shapes/library_maps.png", // URL to Google's file map icon
             // This marker is 20 pixels wide by 32 pixels high.
-            size: new google.maps.Size(20, 32),
+            size: new google.maps.Size(32, 32),
             // The origin for this image is (0, 0).
             origin: new google.maps.Point(0, 0),
-            // The anchor for this image is the base of the flagpole at (0, 32).
-            anchor: new google.maps.Point(0, 32),
+            // The anchor for this image is the center at (16, 16).
+            anchor: new google.maps.Point(16, 16),
           };
           // Shapes define the clickable region of the icon. The type defines an HTML
           // <area> element 'poly' which traces out a polygon as a series of X,Y points.
           // The final coordinate closes the poly by connecting to the first coordinate.
           const shape = {
-            coords: [1, 1, 1, 20, 18, 20, 18, 1],
+            coords: [1, 1, 1, 32, 32, 32, 32, 1],
             type: "poly",
           };
 
@@ -496,7 +563,6 @@
         function sendDataToBackend() {
             const destinationValue = document.getElementById("destinationInput").value;
             console.log("Destination value is: " + destinationValue);
-
             let finalValue = "";
             let finalName = "";
             if (destinationValue == "5G6CF34W+CM Soshanguve, South Africa") {
@@ -557,6 +623,8 @@
                 })
                 .then(data => {
                     console.log('Response from backend:', data); // Handle the response from the backend
+                    currentTripId = data.trip_id; // Make sure this variable is defined earlier in your script
+                    replaceCalculateButton();
                 })
                 .catch(error => {
                     console.error('Error:', error); // Handle any errors that occur during the fetch request
@@ -565,10 +633,14 @@
 
 
         function calculateRoute(origin, destination) {
-            //send data to back end first
-            sendDataToBackend();
+            if (currentTripId) {
+                // Update the existing trip's destination
+                updateFinalDestination(currentTripId, destination);
+            } else {
+                // Calculate a new route and create a trip
+                sendDataToBackend(destination);
+            }
             const directionsService = new google.maps.DirectionsService();
-            const directionsRenderer = new google.maps.DirectionsRenderer();
             directionsRenderer.setMap(map);
 
             const request = {
@@ -588,15 +660,12 @@
                         <p>Duration: ${duration}</p>
                     `;
 
-
-                    var text = "distance to your selected destination is "+distance+" and the time it will take is "+duration;
-                    console.log(text)
+                    var text = "The distance to your selected destination is "+distance+" and the time it will take is "+duration;
+                    console.log(text);
                     if ('speechSynthesis' in window) {
                         // Create a new SpeechSynthesisUtterance object
                         const speech = new SpeechSynthesisUtterance(text);
 
-                        // Set properties (optional)
-                        // You can set properties like voice, volume, rate, pitch, etc.
                         speech.voice = speechSynthesis.getVoices()[0]; // Default voice
                         speech.volume = 1; // Max volume
                         speech.rate = 1; // Normal speed
@@ -607,7 +676,27 @@
                     } else {
                         console.error('Sorry, your browser does not support text-to-speech.');
                     }
-                }else {
+
+                    // Send data to backend using AJAX
+                    $.ajax({
+                        type: "POST",
+                        url: "/store_trip/", // URL of the backend view function to handle storing trips
+                        data: {
+                            csrfmiddlewaretoken: getCookie('csrftoken'), // Include CSRF token for security
+                            start_point: JSON.stringify(origin),
+                            destination: destination
+                        },
+                        success: function (response) {
+                            console.log(response); // Log response from backend (optional)
+                            // Handle success response if needed (optional)
+                        },
+                        error: function (xhr, errmsg, err) {
+                            console.log(xhr.status + ": " + xhr.responseText); // Log error message (optional)
+                            // Handle error response if needed (optional)
+                        }
+                    });
+
+                } else {
                     console.error('Directions request failed due to: ' + status);
                     document.getElementById('distanceResult').innerHTML = `
                         <p>Failed to calculate route. Please try again.</p>
@@ -616,45 +705,128 @@
             });
         }
 
-        function startChat() {
-            // Function to handle chat button click
-            console.log("Chat button clicked.");
-            alert("Chat functionality is not yet implemented.");
-        }
+        
 
-        function startEmergency() {
-            // Function to handle emergency button click
-            console.log("Emergency button clicked.");
-            alert("Emergency functionality is not yet implemented.");
-        }
-    </script>
-    <script>
-        document.getElementById("destinationForm").addEventListener("submit", function (event) {
-            event.preventDefault();
-            const origin = userLocation; // User's current location
-            const destination = document.getElementById("destinationInput").value; // Chosen destination
+        function replaceCalculateButton() {
+        const buttonContainer = document.getElementById('button-container');
+        buttonContainer.innerHTML = `
+            <button onclick="changeFinalDestination()" class="btn btn-warning">Change Final Destination</button>
+            <button onclick="event.preventDefault(); cancelTrip();" class="btn btn-danger">Cancel Trip</button>
+        `;
+    }
 
-            // Send data to backend using AJAX
-            $.ajax({
-                type: "POST",
-                url: "/store_trip/", // URL of the backend view function to handle storing trips
-                data: {
-                    csrfmiddlewaretoken: "{{ csrf_token }}", // Include CSRF token for security
-                    start_point: JSON.stringify(origin),
-                    destination: destination
+    function changeFinalDestination() {
+        // Show the destination selection again
+        document.getElementById('destinationInput').style.display = 'block';
+        // Change the buttons to "Update Route" and "Cancel"
+        const buttonContainer = document.getElementById('button-container');
+        buttonContainer.innerHTML = `
+            <button type="submit" class="btn btn-primary">Update Route</button>
+            <button onclick="event.preventDefault(); cancelTrip();" class="btn btn-danger">Cancel Trip</button>
+        `;
+    }
+
+        function updateFinalDestination(tripId, destination) {
+            console.log("Attempting to update final destination for trip ID:", tripId);
+            const [latitude, longitude] = destination.split(',').map(Number);
+            const requestData = {
+                finalDestinationValue: destination,
+                finalDestinationName: document.querySelector("#destinationInput option:checked").text
+            };
+            console.log("Request data for updating final destination:", requestData);
+
+            fetch(`/AbilityAssistWebApp/update_final_destination/${tripId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
                 },
-                success: function (response) {
-                    console.log(response); // Log response from backend (optional)
-                    // Handle success response if needed (optional)
-                },
-                error: function (xhr, errmsg, err) {
-                    console.log(xhr.status + ": " + xhr.responseText); // Log error message (optional)
-                    // Handle error response if needed (optional)
-                }
+                body: JSON.stringify(requestData)
+            })
+            .then(response => {
+                console.log("Response status for updating final destination:", response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Success response for updating final destination:', data);
+                showNotification('Final destination updated successfully');
+                calculateRoute(userLocation, {lat: latitude, lng: longitude});
+            })
+            .catch(error => {
+                console.error('Error in updating final destination:', error);
             });
-        });
-    </script>
+        }
 
+        function cancelTrip() {
+            if (!currentTripId) {
+                console.log("No current trip ID to cancel.");
+                alert('No current trip to cancel.');
+                return;
+            }
+
+            console.log("Attempting to cancel trip with ID:", currentTripId);
+
+            fetch(`/AbilityAssistWebApp/cancel_trip/${currentTripId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ cancelled: true })
+            })
+            .then(response => {
+                console.log("Response status for cancelling trip:", response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Success response for cancelling trip:', data);
+                showNotification('Trip cancelled successfully');
+                currentTripId = null; // Reset the currentTripId
+                directionsRenderer.setDirections({ routes: [] }); // Clear the route from the map
+                document.getElementById('button-container').innerHTML = '<button type="submit" class="btn btn-primary">Calculate Route</button>';
+            })
+            .catch(error => {
+                console.error('Error in cancelling trip:', error);
+            });
+        }
+
+        // Add the getCookie function here if not already present
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function showNotification(message) {
+            // Update the modal body text
+            $('#notificationModalBody').text(message);
+
+            // Show the modal
+            $('#notificationModal').modal('show');
+        }
+
+        // Event listener for the chat button
+        document.getElementById("voiceButton").addEventListener("click", function() {
+            $('#chatModal').modal('show');
+        });
+
+        // Event listener for the emergency button
+        document.querySelector(".emergency-button").addEventListener("click", function() {
+            $('#emergencyModal').modal('show');
+        });
+
+    </script>
 
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBSsRDen4V8Q8SdtG1Mz6UirWhM_mLHCfA&callback=initMap&libraries=places">
     </script>
