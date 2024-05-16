@@ -1,0 +1,1 @@
+web: gunicorn AbilityAssist.wsgi --log-file -
