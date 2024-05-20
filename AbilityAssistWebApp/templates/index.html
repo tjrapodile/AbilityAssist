@@ -414,6 +414,11 @@
         var map;
         var currentTripId = null;
         var directionsRenderer;
+        var directionsService;
+        let tripInterval;
+        var isCreatingTrip = false;
+        var userFinalDestination = { value: null };
+        var userLocationMarker;
         var tutSouthCampusBounds = {
             north: -25.5372,
             south: -25.5444,
@@ -435,6 +440,7 @@
                 gestureHandling: 'cooperative' // Allow map panning within bounds
             });
 
+            directionsService = new google.maps.DirectionsService();
             directionsRenderer = new google.maps.DirectionsRenderer();
             directionsRenderer.setMap(map);
 
@@ -453,14 +459,13 @@
                         console.log(userLocation);
 
                         // Create a marker at the user's location
-                        var marker = new google.maps.Marker({
+                            userLocationMarker = new google.maps.Marker({
                             position: userLocation,
                             map: map,
                             title: 'Your Location'
                         });
 
-                        // Center the map on the user's location
-                        map.setCenter(userLocation);
+
                     },
                     function(error) {
                         console.error('Error: The Geolocation service failed:', error);
@@ -561,7 +566,12 @@
           }
         }
 
-        function sendDataToBackend() {
+        function sendDataToBackend(distance, duration) {
+            if (currentTripId || isCreatingTrip) {
+                console.log("Trip is already initialized or being created. Not creating a new trip.");
+                return;
+            }
+            isCreatingTrip = true;
             const destinationValue = document.getElementById("destinationInput").value;
             console.log("Destination value is: " + destinationValue);
             let finalValue = "";
@@ -571,7 +581,7 @@
                 finalName = "Main Gate";
             } else if (destinationValue == "5G6CF35X+Q3 Soshanguve, South Africa") {
                 finalValue = "5G6CF34W+CM Soshanguve, South Africa";
-                finalName = "Small Main";
+                finalName = "Small Gate";
             } else if (destinationValue == "5G6CF35W+V5 Soshanguve,  South Africa") {
                 finalValue = "5G6CF35W+V5 Soshanguve,  South Africa";
                 finalName = "Library";
@@ -583,7 +593,7 @@
                 finalName = "One Stop Building";
             } else if (destinationValue == "F35V+VX Soshanguve, South Africa") {
                 finalValue = "F35V+VX Soshanguve, South Africa";
-                finalName = "Male A& Female Resident Admin Building";
+                finalName = "Male & Female Resident Admin Building";
             } else if (destinationValue == "5G6CF35W+Q7 Soshanguve, South Africa") {
                 finalValue = "5G6CF35W+Q7 Soshanguve, South Africa";
                 finalName = "Financial Aid Office";
@@ -601,7 +611,9 @@
             // Send trip data to backend
             const tripJSON = {
                 initialPoint: { latitude: userLocation.lat, longitude: userLocation.lng }, // Corrected the spelling of latitude and longitude
-                finalPoint: { finalDestinationValue: finalValue, finalDestinationName: finalName }
+                finalPoint: { finalDestinationValue: finalValue, finalDestinationName: finalName },
+                distance: distance, // Include distance
+                duration: duration // Include duration
             };
             console.log("Here is the object to be sent to backend: " + JSON.stringify(tripJSON));
             const url = 'store_trip/';
@@ -626,11 +638,108 @@
                     console.log('Response from backend:', data); // Handle the response from the backend
                     currentTripId = data.trip_id; // Make sure this variable is defined earlier in your script
                     replaceCalculateButton();
+                    setupLocationUpdateInterval();
                 })
                 .catch(error => {
                     console.error('Error:', error); // Handle any errors that occur during the fetch request
+                })
+                .finally(() => {
+                    isCreatingTrip = false;
                 });
         }
+
+
+        document.getElementById("destinationForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const destinationInput = document.getElementById("destinationInput");
+            const destination = destinationInput.value;
+            if (destination) {
+                userFinalDestination.value = destination;
+                calculateRoute(userLocation, destination);
+                if (tripInterval) clearInterval(tripInterval);
+                tripInterval = setInterval(() => {
+                    // Periodically update the user's location and UI
+                    navigator.geolocation.getCurrentPosition(position => {
+                        updateCurrentLocation(position.coords.latitude, position.coords.longitude, currentTripId);
+                    });
+                }, 5000); // Update every 5 seconds
+            }
+
+        });
+
+        function updateMapAndRoute(latitude, longitude, destinationValue) {
+            updateUserLocationMarker(latitude, longitude);
+            // Assuming you have the latitude and longitude for the destination
+            const currentPosition = new google.maps.LatLng(latitude, longitude);
+
+            const request = {
+                origin: currentPosition,
+                destination: destinationValue,
+                travelMode: google.maps.TravelMode.WALKING
+            };
+
+            directionsService.route(request, (result, status) => {
+                if (status === 'OK') {
+                    directionsRenderer.setDirections(result);
+                    // Update UI with the new distance and duration
+                    const distance = result.routes[0].legs[0].distance.text;
+                    const duration = result.routes[0].legs[0].duration.text;
+                    document.getElementById('distanceResult').textContent = `Distance: ${distance}, Duration: ${duration}`;
+                } else {
+                    console.error('Directions request failed due to ' + status);
+                }
+            });
+        }
+
+        function setupLocationUpdateInterval() {
+            if (tripInterval) clearInterval(tripInterval);
+            tripInterval = setInterval(() => {
+                navigator.geolocation.getCurrentPosition(position => {
+                    updateCurrentLocation(position.coords.latitude, position.coords.longitude, currentTripId);
+                }, error => console.error('Error getting current position:', error));
+            }, 5000); // Update every 5 seconds
+            console.log("Location update interval set.");
+        }
+
+        function updateCurrentLocation(latitude, longitude, tripId) {
+            if (!tripId) {
+                console.log("Trip is already initialized. Not creating a new trip.");
+                return;
+            }
+            console.log("Updating current location for trip ID:", tripId);
+
+            fetch(`/AbilityAssistWebApp/update_current_location/${tripId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ latitude, longitude })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Trip location updated: ", data)
+                console.log("User's current location:", "Latitude:", latitude, "Longitude:", longitude);
+                console.log("userFinalDestination value type:", typeof userFinalDestination.value);
+                updateMapAndRoute(latitude, longitude, userFinalDestination.value);
+            })
+            .catch(error => console.error('Error updating trip location:', error));
+        }
+
+        function updateUserLocationMarker(lat, lng) {
+            if (userLocationMarker && userLocationMarker.setPosition) {
+                var newPosition = new google.maps.LatLng(lat, lng);
+                userLocationMarker.setPosition(newPosition);
+            } else {
+                // Create a new marker
+                userLocationMarker = new google.maps.Marker({
+                    position: newPosition,
+                    map: map,
+                    title: 'Your Location'
+                });
+            }
+        }
+
 
 
         function calculateRoute(origin, destination) {
@@ -638,10 +747,8 @@
                 // Update the existing trip's destination
                 updateFinalDestination(currentTripId, destination);
             } else {
-                // Calculate a new route and create a trip
-                sendDataToBackend(destination);
+
             }
-            const directionsService = new google.maps.DirectionsService();
             directionsRenderer.setMap(map);
 
             const request = {
@@ -660,6 +767,8 @@
                         <p>Distance: ${distance}</p>
                         <p>Duration: ${duration}</p>
                     `;
+                    // Calculate a new route and create a trip
+                    sendDataToBackend(distance, duration);
 
                     var text = "The distance to your selected destination is "+distance+" and the time it will take is "+duration;
                     console.log(text);
@@ -832,7 +941,7 @@
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBSsRDen4V8Q8SdtG1Mz6UirWhM_mLHCfA&callback=initMap&libraries=places">
     </script>
     <!-- Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>

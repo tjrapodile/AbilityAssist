@@ -181,6 +181,25 @@
             background-color: #ddd;
         }
 
+        .table-responsive {
+        overflow-x: auto; /* Allow horizontal scrolling */
+    }
+
+    /* Improved button layout */
+    .form-inline button,
+    .form-inline a {
+        margin-top:8px;
+        margin-bottom: 10px; /* Spacing between buttons */
+    }
+
+    /* Fix header on smaller screens */
+    @media (max-width: 768px) {
+        .navbar-brand img {
+            height: auto;
+            width: auto;
+            max-height: 35px; /* Smaller logo on small screens */
+        }
+
     </style>
 </head>
 
@@ -241,14 +260,24 @@
             <div class="col-md-12">
                 <h1>Users Trips leaderboard</h1>
                 <form method="get" action="{% url 'user_stats' %}" class="form-inline mb-3">
+                    <select class="custom-select mr-sm-2" id="searchType" name="search_type">
+                        <option value="all">No filter</option>
+                        <option value="position">Position</option>
+                        <option value="username">Username</option>
+                    </select>
+                    <input type="text" name="search" value="{{ search_query }}" class="form-control mr-sm-2" placeholder="Search...">
+                    <button type="submit" class="btn btn-outline-success my-2 my-sm-0">Search</button>
+                </form>
+                <form method="get" action="{% url 'user_stats' %}" class="form-inline mb-3">
                     <input type="hidden" name="pdf" value="true">
-                    <button type="submit" class="btn btn-secondary">Download PDF</button>
+                    <input type="hidden" name="search" value="{{ search_query }}">
+                    <input type="hidden" name="search_type" value="{{ search_type }}">
+                    <button type="submit" class="btn btn-secondary mr-2" formaction="{% url 'user_stats_pdf' %}">Download PDF</button>
+                    <button type="submit" class="btn btn-success mr-2" formaction="{% url 'user_stats_csv' %}">Download CSV</button>
+                    <button type="submit" class="btn btn-info mr-2" formaction="{% url 'user_stats_txt' %}">Download TXT</button>
+                    <button type="submit" class="btn btn-warning" formaction="{% url 'user_stats_doc' %}">Download DOC</button>
                 </form>
-                <form method="get" class="form-inline mb-3">
-                    <input type="text" name="search" value="{{ search_query }}" class="form-control mr-sm-2" placeholder="Search position...">
-                    <button type="submit" class="btn btn-outline-success my-2 my-sm-0">Search For Pos. Number</button>
-                </form>
-                <div class="table-container">
+                <div class="table-container table-responsive">
                     <table class="table table-striped">
                         <thead>
                             <tr>
@@ -260,7 +289,7 @@
                         <tbody>
                             {% for user_stat in user_stats %}
                             <tr>
-                                <td>{{ forloop.counter }}</td>
+                                <td>{{ user_stat.rank }}</td>
                                 <td>{{ user_stat.username }}</td>
                                 <td>{{ user_stat.trip_count }}</td>
                             </tr>

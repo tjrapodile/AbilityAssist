@@ -9,18 +9,33 @@ class Trip(models.Model):
     start_point = models.ForeignKey('InitialGeolocation', on_delete=models.CASCADE)
     end_point = models.ForeignKey('FinalGeolocation', on_delete=models.CASCADE, null=True)
     date = models.DateTimeField(auto_now_add=True)
-    cancelled = models.BooleanField(default=False)  # New field
+    cancelled = models.BooleanField(default=False)
+    distance = models.CharField(max_length=50, blank=True, null=True)  # New field
+    duration = models.CharField(max_length=50, blank=True, null=True)  # New field
 
     def __str__(self):
-        return f'{self.start_point} to {self.end_point}'
+        return f'{self.user.username} trip from {self.start_point} to {self.end_point}'
 
-class FinalGeolocation(models.Model):
-    value = models.CharField(max_length=50)
-    name = models.CharField(max_length = 100)
+class LocationUpdate(models.Model):
+    trip = models.ForeignKey('Trip', related_name='location_updates', on_delete=models.CASCADE)
+    latitude = models.CharField(max_length=50)
+    longitude = models.CharField(max_length=50)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        return f'Location update for {self.trip} at {self.timestamp}'
 
 class InitialGeolocation(models.Model):
     longitude = models.CharField(max_length=50)
     latitude = models.CharField(max_length=50)
+    updated_at = models.DateTimeField(auto_now=True)
+
+class FinalGeolocation(models.Model):
+    value = models.CharField(max_length=50)
+    name = models.CharField(max_length = 100)
 
 
 class AboutImage(models.Model):
@@ -38,6 +53,8 @@ class AboutImage(models.Model):
         except:
             url = ''
         return url
+
+
 
 
 

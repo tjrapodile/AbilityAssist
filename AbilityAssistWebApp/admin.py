@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import Trip, FinalGeolocation, InitialGeolocation, AboutImage
+from .models import Trip, FinalGeolocation, InitialGeolocation, AboutImage, LocationUpdate
 import csv
 from django.http import HttpResponse
 
@@ -27,7 +27,7 @@ class UserAdmin(BaseUserAdmin):
 
 # ModelAdmin classes for your models
 class TripAdmin(admin.ModelAdmin):
-    list_display = ('user', 'start_point', 'end_point', 'date') # Fields to display in list view
+    list_display = ('user', 'start_point', 'end_point', 'date', 'distance', 'duration') # Fields to display in list view
     actions = [export_to_csv]
 
 class FinalGeolocationAdmin(admin.ModelAdmin):
@@ -35,7 +35,7 @@ class FinalGeolocationAdmin(admin.ModelAdmin):
     actions = [export_to_csv]
 
 class InitialGeolocationAdmin(admin.ModelAdmin):
-    list_display = ('longitude', 'latitude')  # Fields to display in list view
+    list_display = ('longitude', 'latitude', 'updated_at')  # Fields to display in list view
     actions = [export_to_csv]
 
 # Unregister the original UserAdmin and register the new UserAdmin with export action
@@ -47,3 +47,4 @@ admin.site.register(Trip, TripAdmin)
 admin.site.register(FinalGeolocation, FinalGeolocationAdmin)
 admin.site.register(InitialGeolocation, InitialGeolocationAdmin)
 admin.site.register(AboutImage)
+admin.site.register(LocationUpdate)

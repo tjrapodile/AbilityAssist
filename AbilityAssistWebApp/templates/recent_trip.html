@@ -181,6 +181,25 @@
             background-color: #ddd;
         }
 
+        .table-responsive {
+        overflow-x: auto; /* Allow horizontal scrolling */
+    }
+
+    /* Improved button layout */
+    .form-inline button,
+    .form-inline a {
+        margin-top:8px;
+        margin-bottom: 10px; /* Spacing between buttons */
+    }
+
+    /* Fix header on smaller screens */
+    @media (max-width: 768px) {
+        .navbar-brand img {
+            height: auto;
+            width: auto;
+            max-height: 35px; /* Smaller logo on small screens */
+        }
+
     </style>
 </head>
 
@@ -241,10 +260,12 @@
             <div class="col-md-12">
                 <h1>Most Recent Trip</h1>
                 <form method="get" action="{% url 'recent_trip' %}" class="form-inline mb-3">
-                    <input type="hidden" name="pdf" value="true">
-                    <button type="submit" class="btn btn-secondary">Download PDF</button>
+                    <a href="{% url 'recent_trip_pdf' %}" class="btn btn-secondary mr-2">Download PDF</a>
+                    <a href="{% url 'recent_trip_csv' %}" class="btn btn-success mx-2">Download CSV</a>
+                    <a href="{% url 'recent_trip_txt' %}" class="btn btn-info mx-2">Download TXT</a>
+                    <a href="{% url 'recent_trip_doc' %}" class="btn btn-warning mx-2">Download Word Document</a>
                 </form>
-                <div class="table-container">
+                <div class="table-container table-responsive">
                     <table class="table table-striped">
                         <thead>
                             <tr>
