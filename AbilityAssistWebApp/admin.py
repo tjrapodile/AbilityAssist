@@ -27,7 +27,7 @@ class UserAdmin(BaseUserAdmin):
 
 # ModelAdmin classes for your models
 class TripAdmin(admin.ModelAdmin):
-    list_display = ('user', 'start_point', 'end_point', 'date', 'distance', 'duration') # Fields to display in list view
+    list_display = ('user', 'start_point', 'end_point', 'date', 'distance', 'duration', 'cancelled', 'completed') # Fields to display in list view
     actions = [export_to_csv]
 
 class FinalGeolocationAdmin(admin.ModelAdmin):

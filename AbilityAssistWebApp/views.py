@@ -376,6 +376,7 @@ def update_final_destination(request, trip_id):
 def cancel_trip(request, trip_id):
     trip = Trip.objects.get(id=trip_id, user=request.user)
     trip.cancelled = True
+    trip.completed = True
     trip.save()
     # Optionally, you can log the cancellation to the Django server console
     print(f'Trip ID {trip_id} cancelled successfully.')
