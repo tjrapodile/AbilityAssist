@@ -1,8 +1,10 @@
+import re
+
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
-from django.core.validators import validate_email
+from django.core.validators import validate_email, RegexValidator
 from django.core.exceptions import ValidationError
 
 
@@ -23,6 +25,19 @@ class RegistrationForm(UserCreationForm):
         if User.objects.filter(username=username).exists():
             raise forms.ValidationError("This username is already in use.")
         return username
+
+    def clean_first_name(self):
+        first_name = self.cleaned_data.get("first_name")
+        if not re.match(r'^[A-Za-z\s]+$', first_name):
+            raise forms.ValidationError("Only alphabetic characters are allowed in the first name.")
+        return first_name
+
+    def clean_last_name(self):
+        last_name = self.cleaned_data.get("last_name")
+        if not re.match(r'^[A-Za-z\s]+$', last_name):
+            raise forms.ValidationError("Only alphabetic characters are allowed in the last name.")
+        return last_name
+
 
     def clean_email(self):
         email = self.cleaned_data.get("email")

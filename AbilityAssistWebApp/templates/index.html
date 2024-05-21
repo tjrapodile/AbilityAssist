@@ -319,7 +319,7 @@
                         </select>
                     </div>
                     <div class="form-group" id="button-container">
-                        <button type="submit" class="btn btn-primary">Calculate Route</button>
+                        <button type="submit" id ="calculateRouteButton" class="btn btn-primary">Calculate Route</button>
                     </div>
                 </form>
 
@@ -593,6 +593,109 @@
           }
         }
 
+        // Initialize speech recognition
+        var recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        function askForVoiceAssistance() {
+            const question = "Welcome to AbilityAssist. If you require voice assistance, please say 'a'. Otherwise, say 'b'.";
+            speak(question);
+            // Start listening for the user's response after asking the question
+            setTimeout(() => recognition.start(), 1000); // Wait a bit before starting recognition to give time for the speech to finish
+        }
+
+
+        function speak(text, callback) {
+            if ('speechSynthesis' in window) {
+                // Cancel any ongoing speech synthesis
+                window.speechSynthesis.cancel();
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.onend = function(event) {
+                    if (typeof callback === 'function') {
+                        callback();
+                    }
+                };
+                window.speechSynthesis.speak(utterance);
+            } else {
+                console.error('Sorry, your browser does not support text-to-speech.');
+            }
+        }
+
+
+        recognition.onresult = function(event) {
+            var speechResult = event.results[0][0].transcript.toLowerCase();
+            console.log('User says:', speechResult);
+
+            if (speechResult.includes("a") || speechResult.includes("yes")) {
+                // User wants voice assistance
+                console.log("Voice assistance activated.");
+                readDestinations();
+            } else if (speechResult.includes("b") || speechResult.includes("no")) {
+                // User doesn't want voice assistance
+                console.log("Voice assistance deactivated.");
+                speak("Okay, good luck.", function() {
+                    // This callback function will be executed after the speech synthesis has finished speaking.
+                    console.log("Finished saying goodbye.");
+                });
+            } else {
+                // User has provided a number for a destination
+                var destinationNumber = parseInt(speechResult, 10);
+                if (!isNaN(destinationNumber)) {
+                    selectDestinationFromNumber(destinationNumber);
+                } else {
+                    // Unrecognized response, ask again
+                    speak("Sorry, I didn't catch that. If you require voice assistance, please say 'a' or 'yes'. Otherwise, say 'b' or 'no'.", function() {
+                        recognition.start();
+                    });
+                }
+            }
+        };
+
+        const destinations = [
+            "Main Gate",
+            "Small Gate",
+            "Library",
+            "Building 13",
+            "One-Stop Building",
+            "M&W Res admin",
+            "Financial Aid Office",
+            "I-Center",
+            "Gymnasium",
+            "Student town resident admin"
+        ];
+
+        function readDestinations() {
+            let destinationText = "Here are the destinations. ";
+            destinations.forEach(function(destination, index) {
+                destinationText += `For ${destination}, say ${index + 1}. `;
+            });
+            destinationText += "Please say your destination number after the tone.";
+
+            speak(destinationText, function() {
+                setTimeout(() => recognition.start(), 1000); // Wait a bit before starting recognition to give time for the speech to finish
+            });
+        }
+
+        recognition.onerror = function (event) {
+            console.error('Speech recognition error', event.error);
+            // Handle errors or restart recognition
+            askForVoiceAssistance();
+            recognition.start();
+
+        };
+
+
+
+        function greetUser() {
+            const greetingText = "I will read out the list of destinations for you.";
+            speak(greetingText);
+            readDestinations();
+        }
+
+
         function sendDataToBackend(distance, duration) {
             if (currentTripId || isCreatingTrip) {
                 console.log("Trip is already initialized or being created. Not creating a new trip.");
@@ -828,6 +931,10 @@
                     `;
                     // Calculate a new route and create a trip
                     sendDataToBackend(distance, duration);
+                    // Voice guidance for the route
+                    const steps = result.routes[0].legs[0].steps;
+                    const voiceInstructions = steps.map(step => step.instructions).join('. ');
+                    speak(voiceInstructions);
 
                     var text = "The distance to your selected destination is "+distance+" and the time it will take is "+duration;
                     console.log(text);
@@ -1007,6 +1114,37 @@
             document.getElementById('distanceResult').innerHTML = ''; // Clear distance result
             currentTripId = null; // Reset current trip ID
         });
+
+        function selectDestinationFromNumber(destinationNumber) {
+            const index = parseInt(destinationNumber, 10) - 1; // Convert spoken number to index
+            if (isNaN(index) || index < 0 || index >= destinations.length) {
+                speak("Sorry, I didn't understand that. Please say the number of your destination again.", function () {
+                    recognition.start();
+                });
+                return;
+            }
+
+            const destinationSelect = document.getElementById('destinationInput');
+            destinationSelect.selectedIndex = index + 1; // Assuming the first option is "Select a destination"
+            const selectedDestinationName = destinationSelect.options[destinationSelect.selectedIndex].text;
+            speak(`You have selected ${selectedDestinationName}. Calculating route.`, function () {
+                document.getElementById('calculateRouteButton').click();
+            });
+        };
+
+        window.onload = function () {
+            // Ask the user if they require voice assistance
+            initMap();
+            askForVoiceAssistance();
+
+        };
+
+        function askForVoiceAssistance() {
+            const question = "Welcome to AbilityAssist. If you require voice assistance, please say 'a'. Otherwise, say 'b'.";
+            speak(question);
+            // Start listening for the user's response after asking the question
+            setTimeout(() => recognition.start(), 1000); // Wait a bit before starting recognition to give time for the speech to finish
+        }
 
     </script>
 
