@@ -16,7 +16,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <style>
         /* Custom CSS */
-        /* Custom CSS */
         body {
             font-family: 'Poppins', sans-serif;
             background-color: #e7f1f7;
@@ -863,6 +862,7 @@
                 })
                 .then(data => {
                     console.log('Trip marked as completed:', data);
+                    showTripCompletionModal();
                 })
                 .catch(error => {
                     console.error('Error completing trip:', error);
@@ -1090,6 +1090,10 @@
 
             // Show the modal
             $('#notificationModal').modal('show');
+        }
+
+        function showTripCompletionModal() {
+          $('#tripCompletionModal').modal('show'); // Make sure this ID matches your modal's ID
         }
 
         // Event listener for the chat button
