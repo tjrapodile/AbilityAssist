@@ -10,8 +10,10 @@ class Trip(models.Model):
     end_point = models.ForeignKey('FinalGeolocation', on_delete=models.CASCADE, null=True)
     date = models.DateTimeField(auto_now_add=True)
     cancelled = models.BooleanField(default=False)
-    distance = models.CharField(max_length=50, blank=True, null=True)  # New field
-    duration = models.CharField(max_length=50, blank=True, null=True)  # New field
+    distance = models.CharField(max_length=50, blank=True, null=True)
+    duration = models.CharField(max_length=50, blank=True, null=True)
+    completed = models.BooleanField(default=False)
+
 
     def __str__(self):
         return f'{self.user.username} trip from {self.start_point} to {self.end_point}'

@@ -375,6 +375,25 @@
                         </div>
                     </div>
                 </div>
+                <!-- Trip Completion Modal -->
+                <div class="modal" id="tripCompletionModal" tabindex="-1" role="dialog" aria-labelledby="tripCompletionModalLabel" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="tripCompletionModalLabel">Trip Completed</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        Congratulations! You have reached your destination.
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="newTripButton">Start a New Trip</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
             </div>
         </div>
 
@@ -419,6 +438,7 @@
         var isCreatingTrip = false;
         var userFinalDestination = { value: null };
         var userLocationMarker;
+        var initialZoomLevel = 10;
         var tutSouthCampusBounds = {
             north: -25.5372,
             south: -25.5444,
@@ -432,7 +452,7 @@
             var tutSouthCampus = { lat: -25.54055, lng: 28.095 };
             map = new google.maps.Map(document.getElementById("map-container"), {
                 center: tutSouthCampus, // Center the map on TUT main campus
-                zoom: 15,
+                zoom: initialZoomLevel,
                 restriction: {
                     latLngBounds: tutSouthCampusBounds,
                     strictBounds: false
@@ -465,7 +485,8 @@
                             title: 'Your Location'
                         });
 
-
+                        // Center the map on the user's location
+                        map.setCenter(userLocation);
                     },
                     function(error) {
                         console.error('Error: The Geolocation service failed:', error);
@@ -681,6 +702,7 @@
             directionsService.route(request, (result, status) => {
                 if (status === 'OK') {
                     directionsRenderer.setDirections(result);
+                    map.setZoom(initialZoomLevel);
                     // Update UI with the new distance and duration
                     const distance = result.routes[0].legs[0].distance.text;
                     const duration = result.routes[0].legs[0].duration.text;
@@ -707,6 +729,36 @@
                 return;
             }
             console.log("Updating current location for trip ID:", tripId);
+            const destinationLatLng = new google.maps.LatLng(userFinalDestination.value.split(',').map(Number));
+            const currentLatLng = new google.maps.LatLng(latitude, longitude);
+            const distanceToDestination = google.maps.geometry.spherical.computeDistanceBetween(destinationLatLng, currentLatLng);
+             if (distanceToDestination <= 3) {
+                // Stop updating the location
+                clearInterval(tripInterval);
+                // Show the trip completion modal
+                $('#tripCompletionModal').modal('show');
+                // Update the trip as completed in the backend
+                fetch(`/AbilityAssistWebApp/complete_trip/${tripId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ completed: true }) // Update your Django model to include this field
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Trip marked as completed:', data);
+                })
+                .catch(error => {
+                    console.error('Error completing trip:', error);
+                });
+            }
 
             fetch(`/AbilityAssistWebApp/update_current_location/${tripId}/`, {
                 method: 'POST',
@@ -743,6 +795,7 @@
 
 
         function calculateRoute(origin, destination) {
+            origin = userLocationMarker.getPosition();
             if (currentTripId) {
                 // Update the existing trip's destination
                 updateFinalDestination(currentTripId, destination);
@@ -934,6 +987,19 @@
         // Event listener for the emergency button
         document.querySelector(".emergency-button").addEventListener("click", function() {
             $('#emergencyModal').modal('show');
+        });
+
+        document.getElementById("newTripButton").addEventListener("click", function() {
+            // Reset map to initial state
+            if (userLocationMarker) {
+                map.setCenter(userLocationMarker.getPosition());
+                map.setZoom(15);
+            }
+            directionsRenderer.setDirections({ routes: [] }); // Clear the route
+            $('#tripCompletionModal').modal('hide');
+            document.getElementById("destinationInput").selectedIndex = 0; // Reset dropdown
+            document.getElementById('distanceResult').innerHTML = ''; // Clear distance result
+            currentTripId = null; // Reset current trip ID
         });
 
     </script>
