@@ -644,7 +644,7 @@ def user_stats_doc(request):
     response['Content-Disposition'] = 'attachment; filename="user_stats.docx"'
     return response
 
-
+@login_required
 @require_POST
 def complete_trip(request, trip_id):
     try:
