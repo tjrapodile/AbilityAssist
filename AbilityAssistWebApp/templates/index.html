@@ -844,8 +844,6 @@
              if (distanceToDestination <= 10) {
                 // Stop updating the location
                 clearInterval(tripInterval);
-                // Show the trip completion modal
-                $('#tripCompletionModal').modal('show');
                 // Update the trip as completed in the backend
                 fetch(`/AbilityAssistWebApp/complete_trip/${tripId}/`, {
                     method: 'POST',
@@ -867,6 +865,8 @@
                 .catch(error => {
                     console.error('Error completing trip:', error);
                 });
+                // Show the trip completion modal
+                $('#tripCompletionModal').modal('show');
             }
 
             fetch(`/AbilityAssistWebApp/update_current_location/${tripId}/`, {
@@ -1115,9 +1115,7 @@
                 }
 
                 if (distanceValue <= 10) {
-                    // If the distance is less than or equal to 10 meters, consider the trip completed.
-                    showTripCompletionModal();
-                    fetch(`/complete_trip/${currentTripId}/`, {
+                    fetch(`/AbilityAssistWebApp/complete_trip/${currentTripId}/`, {
                         method: 'POST',
                         headers: {
                             'X-CSRFToken': getCookie('csrftoken'),
@@ -1138,6 +1136,8 @@
                     .catch(error => {
                         console.error('Error completing trip:', error);
                     });
+                    // If the distance is less than or equal to 10 meters, consider the trip completed.
+                    showTripCompletionModal();
                 }
             } else {
                 console.error('Unable to find distance in the distanceResult element.');
