@@ -457,7 +457,7 @@
                     latLngBounds: tutSouthCampusBounds,
                     strictBounds: false
                     },
-                gestureHandling: 'greedy' // Allow map panning within bounds
+                gestureHandling: 'cooperative' // Allow map panning within bounds
             });
 
             directionsService = new google.maps.DirectionsService();
@@ -844,6 +844,9 @@
              if (distanceToDestination <= 10) {
                 // Stop updating the location
                 clearInterval(tripInterval);
+                // Show the trip completion modal
+                $('#tripCompletionModal').modal('show');
+                // Update the trip as completed in the backend
                 fetch(`/AbilityAssistWebApp/complete_trip/${tripId}/`, {
                     method: 'POST',
                     headers: {
@@ -860,9 +863,6 @@
                 })
                 .then(data => {
                     console.log('Trip marked as completed:', data);
-                    showTripCompletionModal();
-                    document.getElementById('button-container').innerHTML = '<button type="submit" class="btn btn-primary">Calculate Route</button>';
-                    currentTripId = null; // Resetting currentTripId as the trip is completed
                 })
                 .catch(error => {
                     console.error('Error completing trip:', error);
@@ -1115,6 +1115,8 @@
                 }
 
                 if (distanceValue <= 10) {
+                    // If the distance is less than or equal to 10 meters, consider the trip completed.
+                    showTripCompletionModal();
                     fetch(`/complete_trip/${currentTripId}/`, {
                         method: 'POST',
                         headers: {
@@ -1127,9 +1129,8 @@
                     .then(data => {
                         if (data.success) {
                             console.log('Trip marked as completed:', data.message);
-                            showTripCompletionModal();
-                            document.getElementById('button-container').innerHTML = '<button type="submit" class="btn btn-primary">Calculate Route</button>';
-                            currentTripId = null; // Resetting currentTripId as the trip is completed
+                            $('#tripCompletionModal').modal('show');
+
                         } else {
                             console.error('Error completing trip:', data.error);
                         }
