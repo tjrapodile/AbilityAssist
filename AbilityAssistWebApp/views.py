@@ -647,12 +647,16 @@ def user_stats_doc(request):
 @login_required
 @require_POST
 def complete_trip(request, trip_id):
+    print(f"Received complete_trip request for trip ID: {trip_id}")
     try:
         trip = Trip.objects.get(id=trip_id, user=request.user)
+        print(f"Trip found: {trip}")
         trip.completed = True
         trip.save()
+        print(f"Trip ID {trip_id} marked as completed.")
         return JsonResponse({'success': True, 'message': 'Trip marked as completed.'})
     except Trip.DoesNotExist:
+        print(f"Trip ID {trip_id} not found.")
         return JsonResponse({'success': False, 'error': 'Trip not found.'}, status=404)
 
 
