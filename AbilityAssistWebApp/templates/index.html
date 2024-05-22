@@ -986,40 +986,102 @@
             });
         }
 
-        function simplifyDirection(instruction) {
-            if (instruction.toLowerCase().includes("left")) {
-                return "Turn left.";
-            } else if (instruction.toLowerCase().includes("right")) {
-                return "Turn right.";
-            } else {
-                return "Go straight.";
+        function simplifyDirection(step, distance) {
+            console.log('Received step:', step);
+            console.log('Received distance:', distance);
+
+            // Remove HTML tags and decode HTML entities
+            var div = document.createElement('div');
+            div.innerHTML = step;
+            var instruction = div.textContent || div.innerText || "";
+
+            if (!instruction) {
+                console.error('No instruction text found in step:', step);
+                return ''; // Return an empty string or some default message
             }
+
+            console.log('Stripped instruction:', instruction);
+
+            // Parsing the instruction for directional keywords
+            var direction = instruction.includes('left') ? 'left' :
+                            instruction.includes('right') ? 'right' :
+                            instruction.includes('Head') ? 'forward' : '';
+            console.log('Parsed direction:', direction);
+
+            var detailedInstruction = '';
+
+            switch (direction) {
+                case 'left':
+                    detailedInstruction = `Turn left and move forward ${distance}.`;
+                    break;
+                case 'right':
+                    detailedInstruction = `Turn right and move forward ${distance}.`;
+                    break;
+                case 'forward':
+                    detailedInstruction = `Head forward ${distance}.`;
+                    break;
+                default:
+                    detailedInstruction = `Continue for ${distance}.`;
+                    break;
+            }
+
+            console.log('Detailed instruction:', detailedInstruction);
+            return detailedInstruction;
         }
 
         function watchUserPositionAndAnnounceSteps(steps) {
+            console.log('Starting to watch user position with steps:', steps);
             let currentStepIndex = 0;
             let stepAnnounced = false;
 
-            const watchId = navigator.geolocation.watchPosition(
+            watchId = navigator.geolocation.watchPosition(
                 function(position) {
+                    console.log('Current position:', position);
                     const userLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+
                     if (currentStepIndex < steps.length) {
-                        const stepLocation = new google.maps.LatLng(steps[currentStepIndex].end_location.lat(), steps[currentStepIndex].end_location.lng());
+                        const step = steps[currentStepIndex];
+                        const stepLocation = new google.maps.LatLng(step.end_location.lat(), step.end_location.lng());
+                        const distanceToStepEnd = google.maps.geometry.spherical.computeDistanceBetween(userLocation, stepLocation);
+                        console.log(`Distance to next step end: ${distanceToStepEnd} meters`);
 
-                        if (google.maps.geometry.spherical.computeDistanceBetween(userLocation, stepLocation) < 20 && !stepAnnounced) {
-                            const instruction = simplifyDirection(steps[currentStepIndex].instructions);
-                            speak(instruction);
-                            stepAnnounced = true; // Prevent the instruction from being repeated
+                        if (!stepAnnounced) {
+                            let detailedInstruction = "";
+
+                            // Check if it's the first step and provide a generic instruction
+                            if (currentStepIndex === 0) {
+                                detailedInstruction = "Follow the walking route.";
+                            } else {
+                                // Use distanceToStepEnd as the distance for the voice instruction
+                                const distanceText = (distanceToStepEnd < 1000) ? `${Math.round(distanceToStepEnd)} meters` : `${(distanceToStepEnd / 1000).toFixed(1)} kilometers`;
+
+                                // Extract the instruction text, strip HTML, and get direction
+                                const div = document.createElement('div');
+                                div.innerHTML = step.instructions;
+                                const instructionText = div.textContent || div.innerText || "";
+                                const direction = instructionText.toLowerCase().includes('left') ? 'Turn left' :
+                                                  instructionText.toLowerCase().includes('right') ? 'Turn right' :
+                                                  'Head forward';
+
+                                // Generate the voice instruction
+                                detailedInstruction = `${direction} and continue for ${distanceText}.`;
+                            }
+
+                            console.log('Voice instruction:', detailedInstruction);
+                            speak(detailedInstruction);
+                            stepAnnounced = true;
                         }
 
-                        if (google.maps.geometry.spherical.computeDistanceBetween(userLocation, stepLocation) >= 20) {
-                            stepAnnounced = false; // Allow the next instruction to be announced once user moves away
+                        if (distanceToStepEnd > 30 && stepAnnounced) {
+                            stepAnnounced = false; // Reset the flag to allow the next instruction to be announced
                         }
 
-                        if (google.maps.geometry.spherical.computeDistanceBetween(userLocation, stepLocation) < 10) {
-                            currentStepIndex++; // Move to the next step as user approaches the step end location
+                        if (distanceToStepEnd < 10) {
+                            currentStepIndex++; // Proceed to the next step
+                            stepAnnounced = false; // Allow the new step's instruction to be announced
                         }
                     } else {
+                        console.log('User has reached the destination.');
                         navigator.geolocation.clearWatch(watchId);
                         speak("You have reached your destination.");
                     }
@@ -1093,6 +1155,14 @@
                 console.log("No current trip ID to cancel.");
                 alert('No current trip to cancel.');
                 return;
+            }
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+            if (tripInterval) {
+                clearInterval(tripInterval);
+                tripInterval = null;
             }
 
             console.log("Attempting to cancel trip with ID:", currentTripId);
@@ -1175,6 +1245,14 @@
                     .then(data => {
                         if (data.success) {
                             console.log('Trip marked as completed:', data.message);
+                            if (watchId !== null) {
+                                navigator.geolocation.clearWatch(watchId);
+                                watchId = null;
+                            }
+                            if (tripInterval) {
+                                clearInterval(tripInterval);
+                                tripInterval = null;
+                            }
                             $('#tripCompletionModal').modal('show');
 
                         } else {
