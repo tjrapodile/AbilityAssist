@@ -243,7 +243,7 @@
 
                                 <div class="form-group">
                                     <label for="username">Username</label>
-                                    <input type=tel class="form-control" id="username" name="username" required>
+                                    <input type=text class="form-control" id="username" name="username" pattern="^[a-zA-Z0-9_]+$" title="Username can only contain letters, numbers, and underscores." required>
                                     {% if form.username.errors %}
                                     <div class="error-message alert alert-danger mt-3"
                                         role="alert">{{ form.username.errors }}</div>
