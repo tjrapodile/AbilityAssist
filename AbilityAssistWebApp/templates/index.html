@@ -457,7 +457,7 @@
                     latLngBounds: tutSouthCampusBounds,
                     strictBounds: false
                     },
-                gestureHandling: 'cooperative' // Allow map panning within bounds
+                gestureHandling: 'greedy' // Allow map panning within bounds
             });
 
             directionsService = new google.maps.DirectionsService();
