@@ -861,6 +861,8 @@
                 .then(data => {
                     console.log('Trip marked as completed:', data);
                     showTripCompletionModal();
+                    document.getElementById('button-container').innerHTML = '<button type="submit" class="btn btn-primary">Calculate Route</button>';
+                    currentTripId = null; // Resetting currentTripId as the trip is completed
                 })
                 .catch(error => {
                     console.error('Error completing trip:', error);
@@ -1113,8 +1115,6 @@
                 }
 
                 if (distanceValue <= 10) {
-                    // If the distance is less than or equal to 10 meters, consider the trip completed.
-                    showTripCompletionModal();
                     fetch(`/complete_trip/${currentTripId}/`, {
                         method: 'POST',
                         headers: {
