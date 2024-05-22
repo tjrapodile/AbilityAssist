@@ -439,6 +439,7 @@
         var userLocationMarker;
         var initialZoomLevel = 10;
         var isCalculatingRoute;
+        var watchId;
         var tutSouthCampusBounds = {
             north: -25.5372,
             south: -25.5444,
@@ -792,7 +793,7 @@
                     navigator.geolocation.getCurrentPosition(position => {
                         updateCurrentLocation(position.coords.latitude, position.coords.longitude, currentTripId);
                     });
-                }, 5000); // Update every 5 seconds
+                }, 3000); // Update every 3 seconds
             }
 
         });
@@ -824,11 +825,13 @@
 
         function setupLocationUpdateInterval() {
             if (tripInterval) clearInterval(tripInterval);
+            if (watchId) navigator.geolocation.clearWatch(watchId);
             tripInterval = setInterval(() => {
                 navigator.geolocation.getCurrentPosition(position => {
                     updateCurrentLocation(position.coords.latitude, position.coords.longitude, currentTripId);
+                    updateMapAndRoute(position.coords.latitude, position.coords.longitude, userFinalDestination.value);
                 }, error => console.error('Error getting current position:', error));
-            }, 5000); // Update every 5 seconds
+            }, 3000); // Update every 3 seconds
             console.log("Location update interval set.");
         }
 
@@ -936,27 +939,23 @@
                     `;
                     // Calculate a new route and create a trip
                     sendDataToBackend(distance, duration);
-                    // Voice guidance for the route
-                    const steps = result.routes[0].legs[0].steps;
-                    const voiceInstructions = steps.map(step => step.instructions).join('. ');
-                    speak(voiceInstructions);
 
+                    // Voice guidance for the route
                     var text = "The distance to your selected destination is "+distance+" and the time it will take is "+duration;
                     console.log(text);
-                    if ('speechSynthesis' in window) {
-                        // Create a new SpeechSynthesisUtterance object
-                        const speech = new SpeechSynthesisUtterance(text);
 
-                        speech.voice = speechSynthesis.getVoices()[0]; // Default voice
-                        speech.volume = 1; // Max volume
-                        speech.rate = 1; // Normal speed
-                        speech.pitch = 1; // Normal pitch
-
-                        // Start speaking
-                        speechSynthesis.speak(speech);
-                    } else {
-                        console.error('Sorry, your browser does not support text-to-speech.');
-                    }
+                    speak(text, function() {
+                        // After announcing the total distance and duration, watch the user's position and announce steps
+                        const steps = result.routes[0].legs[0].steps;
+                        if (steps.length > 0) {
+                            let firstInstruction = simplifyDirection(steps[0].instructions);
+                            speak(firstInstruction, function() {
+                                // Begin watching the user's position and announce subsequent steps
+                                setupLocationUpdateInterval();
+                                watchUserPositionAndAnnounceSteps(steps.slice(1)); // Pass remaining steps except the first one
+                            });
+                        }
+                    });
 
                     // Send data to backend using AJAX
                     $.ajax({
@@ -987,26 +986,75 @@
             });
         }
 
+        function simplifyDirection(instruction) {
+            if (instruction.toLowerCase().includes("left")) {
+                return "Turn left.";
+            } else if (instruction.toLowerCase().includes("right")) {
+                return "Turn right.";
+            } else {
+                return "Go straight.";
+            }
+        }
+
+        function watchUserPositionAndAnnounceSteps(steps) {
+            let currentStepIndex = 0;
+            let stepAnnounced = false;
+
+            const watchId = navigator.geolocation.watchPosition(
+                function(position) {
+                    const userLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                    if (currentStepIndex < steps.length) {
+                        const stepLocation = new google.maps.LatLng(steps[currentStepIndex].end_location.lat(), steps[currentStepIndex].end_location.lng());
+
+                        if (google.maps.geometry.spherical.computeDistanceBetween(userLocation, stepLocation) < 20 && !stepAnnounced) {
+                            const instruction = simplifyDirection(steps[currentStepIndex].instructions);
+                            speak(instruction);
+                            stepAnnounced = true; // Prevent the instruction from being repeated
+                        }
+
+                        if (google.maps.geometry.spherical.computeDistanceBetween(userLocation, stepLocation) >= 20) {
+                            stepAnnounced = false; // Allow the next instruction to be announced once user moves away
+                        }
+
+                        if (google.maps.geometry.spherical.computeDistanceBetween(userLocation, stepLocation) < 10) {
+                            currentStepIndex++; // Move to the next step as user approaches the step end location
+                        }
+                    } else {
+                        navigator.geolocation.clearWatch(watchId);
+                        speak("You have reached your destination.");
+                    }
+                },
+                function(error) {
+                    console.error('Error with geolocation watchPosition:', error);
+                },
+                {
+                    enableHighAccuracy: true,
+                    maximumAge: 0,
+                    timeout: 10000
+                }
+            );
+        }
+
 
 
         function replaceCalculateButton() {
-        const buttonContainer = document.getElementById('button-container');
-        buttonContainer.innerHTML = `
-            <button onclick="changeFinalDestination()" class="btn btn-warning">Change Final Destination</button>
-            <button onclick="event.preventDefault(); cancelTrip();" class="btn btn-danger">Cancel Trip</button>
-        `;
-    }
+            const buttonContainer = document.getElementById('button-container');
+            buttonContainer.innerHTML = `
+                <button onclick="changeFinalDestination()" class="btn btn-warning">Change Final Destination</button>
+                <button onclick="event.preventDefault(); cancelTrip();" class="btn btn-danger">Cancel Trip</button>
+            `;
+        }
 
-    function changeFinalDestination() {
-        // Show the destination selection again
-        document.getElementById('destinationInput').style.display = 'block';
-        // Change the buttons to "Update Route" and "Cancel"
-        const buttonContainer = document.getElementById('button-container');
-        buttonContainer.innerHTML = `
-            <button type="submit" class="btn btn-primary">Update Route</button>
-            <button onclick="event.preventDefault(); cancelTrip();" class="btn btn-danger">Cancel Trip</button>
-        `;
-    }
+        function changeFinalDestination() {
+            // Show the destination selection again
+            document.getElementById('destinationInput').style.display = 'block';
+            // Change the buttons to "Update Route" and "Cancel"
+            const buttonContainer = document.getElementById('button-container');
+            buttonContainer.innerHTML = `
+                <button type="submit" class="btn btn-primary">Update Route</button>
+                <button onclick="event.preventDefault(); cancelTrip();" class="btn btn-danger">Cancel Trip</button>
+            `;
+        }
 
         function updateFinalDestination(tripId, destination) {
             console.log("Attempting to update final destination for trip ID:", tripId);
@@ -1214,7 +1262,7 @@
 
     </script>
 
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBSsRDen4V8Q8SdtG1Mz6UirWhM_mLHCfA&callback=initMap&libraries=places">
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBSsRDen4V8Q8SdtG1Mz6UirWhM_mLHCfA&callback=initMap&libraries=places,geometry">
     </script>
     <!-- Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
