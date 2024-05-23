@@ -1009,84 +1009,72 @@
         }
 
         function watchUserPositionAndAnnounceSteps(steps) {
-            console.log("Received steps:", steps); // Log the received steps for verification
-            steps.forEach((step, index) => {
-                const startLat = step.start_location.lat();
-                const startLng = step.start_location.lng();
-                console.log(`Step ${index} start location:`, { lat: startLat, lng: startLng });
-            });
-
+            console.log("Received steps:", steps);
             let currentStepIndex = 0;
-            let isNextStepAnnounced = false;
-            let distanceForNextStraightAnnouncement = 20; // meters
+            let lastAnnouncedStepIndex = -1;
+            let straightPathAnnouncementCount = 0;
+            const maxStraightPathAnnouncements = 3;
+            const announcementThreshold = 15; // meters within which to announce the next step
 
-            watchId = navigator.geolocation.watchPosition(
-                function(position) {
-                    console.log("Current GPS position:", position); // Log the current GPS position
+            watchId = navigator.geolocation.watchPosition(position => {
+                console.log("Current GPS position:", position);
 
-                    const userPosition = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-                    console.log("User position (LatLng object):", userPosition); // Log the user position object
+                const userPosition = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                console.log("User position (LatLng object):", userPosition);
 
-                    const currentStep = steps[currentStepIndex];
-                    console.log("Current step data:", currentStep); // Log the current step data
+                const currentStep = steps[currentStepIndex];
+                console.log("Current step data:", currentStep);
 
-                    if (!currentStep || !currentStep.end_location) {
-                        console.error("Missing 'end_location' for the current step:", currentStep);
-                        return; // Exit if 'end_location' is missing or undefined
-                    }
-
-                    // Use the functions to get the latitude and longitude values
-                    const stepEndLat = currentStep.end_location.lat();
-                    const stepEndLng = currentStep.end_location.lng();
-                    const stepLocation = new google.maps.LatLng(stepEndLat, stepEndLng);
-                    console.log("Step end location (LatLng object):", stepLocation); // Log the step end location object
-
-                    const distanceToStepEnd = google.maps.geometry.spherical.computeDistanceBetween(userPosition, stepLocation);
-                    console.log(`Distance to the end of the current step: ${distanceToStepEnd} meters`);
-
-                    // Announce next step when close to the end of the current step
-                    if (distanceToStepEnd < 10 && !isNextStepAnnounced && currentStepIndex < steps.length - 1) {
-                        const nextStep = steps[currentStepIndex + 1];
-                        const nextInstruction = simplifyDirection(nextStep.instructions, nextStep.distance.text);
-                        console.log("Announcing next step:", nextInstruction); // Log the next step to be announced
-                        speak(nextInstruction);
-                        isNextStepAnnounced = true;
-                    }
-
-                    // Reset announcement flag and move to next step when the current step is completed
-                    if (distanceToStepEnd < 5) {
-                        currentStepIndex++;
-                        isNextStepAnnounced = false;
-                        distanceForNextStraightAnnouncement = 20;
-                        console.log(`Moved to next step: ${currentStepIndex}`);
-                    }
-
-                    // Periodic "Proceed Straight" announcement in long straight paths without maneuvers
-                    if (!currentStep.maneuver && distanceForNextStraightAnnouncement <= 0 && currentStepIndex < steps.length - 1) {
-                        const straightInstruction = `Proceed straight for ${currentStep.distance.text}.`;
-                        console.log("Announcing straight path:", straightInstruction); // Log the straight path announcement
-                        speak(straightInstruction);
-                        distanceForNextStraightAnnouncement = 20;
-                    } else {
-                        distanceForNextStraightAnnouncement -= distanceToStepEnd;
-                    }
-
-                    // Final destination reached
-                    if (distanceToStepEnd < 10 && currentStepIndex >= steps.length - 1) {
-                        console.log("Final destination reached."); // Log the final destination reached
-                        speak("You have reached your destination.");
-                        navigator.geolocation.clearWatch(watchId);
-                    }
-                },
-                function(error) {
-                    console.error('Error with geolocation watchPosition:', error);
-                },
-                {
-                    enableHighAccuracy: true,
-                    maximumAge: 0,
-                    timeout: 10000
+                if (!currentStep || !currentStep.end_location) {
+                    console.error("Missing 'end_location' for the current step:", currentStep);
+                    return;
                 }
-            );
+
+                const stepEndLocation = new google.maps.LatLng(currentStep.end_location.lat(), currentStep.end_location.lng());
+                console.log("Step end location (LatLng object):", stepEndLocation);
+
+                const distanceToStepEnd = google.maps.geometry.spherical.computeDistanceBetween(userPosition, stepEndLocation);
+                console.log(`Distance to the end of the current step: ${distanceToStepEnd} meters`);
+
+                // Check if we are close to the end of the current step and if the step has not been announced
+                if (distanceToStepEnd < announcementThreshold && lastAnnouncedStepIndex < currentStepIndex) {
+                    // Announce the current step
+                    const instruction = simplifyDirection(currentStep.instructions, currentStep.distance.text);
+                    console.log("Announcing current step:", instruction);
+                    speak(instruction);
+                    lastAnnouncedStepIndex = currentStepIndex;
+                }
+
+                // Move to the next step when the current step is completed
+                if (distanceToStepEnd < 5) {
+                    currentStepIndex++;
+                    straightPathAnnouncementCount = 0; // Reset straight path announcement count
+                    console.log(`Moved to next step: ${currentStepIndex}`);
+                }
+
+                // Announce periodically on a straight path without maneuvers
+                if (!currentStep.maneuver && straightPathAnnouncementCount < maxStraightPathAnnouncements) {
+                    if (distanceToStepEnd < announcementThreshold) {
+                        const straightInstruction = `Proceed straight for ${currentStep.distance.text}.`;
+                        console.log("Announcing straight path:", straightInstruction);
+                        speak(straightInstruction);
+                        straightPathAnnouncementCount++;
+                    }
+                }
+
+                // Final destination reached
+                if (distanceToStepEnd < 10 && currentStepIndex >= steps.length) {
+                    console.log("Final destination reached.");
+                    speak("You have reached your destination.");
+                    navigator.geolocation.clearWatch(watchId);
+                }
+            }, error => {
+                console.error('Error with geolocation watchPosition:', error);
+            }, {
+                enableHighAccuracy: true,
+                maximumAge: 0,
+                timeout: 10000
+            });
         }
 
 
