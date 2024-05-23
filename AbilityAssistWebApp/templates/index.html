@@ -446,6 +446,33 @@
             east: 28.0983,
             west: 28.0929
         };
+        var deviceOrientation = {
+            alpha: null, // Z-axis rotation (in degrees)
+            beta: null,  // X-axis rotation (in degrees)
+            gamma: null  // Y-axis rotation (in degrees)
+        };
+
+        window.addEventListener('deviceorientation', function(event) {
+            deviceOrientation.alpha = event.alpha;
+            deviceOrientation.beta = event.beta;
+            deviceOrientation.gamma = event.gamma;
+        }, true);
+
+        function getDeviceOrientation() {
+            if (deviceOrientation.alpha !== null) {
+                // Adjust alpha according to the cardinal direction the device is facing
+                var direction = (deviceOrientation.alpha + 360) % 360; // Normalize between 0-360 degrees
+                return direction;
+            }
+            return null; // Orientation not available
+        }
+
+        function stopWatchingPosition() {
+            if (watchId !== null) {
+                clearInterval(watchId);
+                watchId = null;
+            }
+        }
 
 
         function initMap() {
@@ -1010,54 +1037,74 @@
         }
 
         function watchUserPositionAndAnnounceSteps(steps) {
+            console.log("Starting to watch user position and announce steps.");
             let currentStepIndex = 0;
-            let lastDistanceToStepEnd = Number.POSITIVE_INFINITY;
-            let lastStraightAnnouncement = Number.NEGATIVE_INFINITY;
+            let isNextStepAnnounced = false;
+            let distanceForNextStraightAnnouncement = 20; // meters
 
-            watchId = navigator.geolocation.watchPosition(
-                function(position) {
+            function checkAndAnnounceSteps() {
+                console.log("Checking and announcing steps...");
+                navigator.geolocation.getCurrentPosition(position => {
                     const userPosition = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-                    const currentStep = steps[currentStepIndex];
-                    const nextStepLocation = new google.maps.LatLng(currentStep.end_location.lat(), currentStep.end_location.lng());
-                    const distanceToNextStepEnd = google.maps.geometry.spherical.computeDistanceBetween(userPosition, nextStepLocation);
+                    if (currentStepIndex < steps.length) {
+                        const currentStep = steps[currentStepIndex];
+                        const stepLocation = new google.maps.LatLng(currentStep.end_location.lat(), currentStep.end_location.lng());
+                        const distanceToStepEnd = google.maps.geometry.spherical.computeDistanceBetween(userPosition, stepLocation);
+                        const userDirection = getDeviceOrientation();
 
-                    if (currentStepIndex === steps.length - 1 && distanceToNextStepEnd < 10) {
-                        // Announce arrival at final destination
-                        speak("You have reached your destination.");
-                        navigator.geolocation.clearWatch(watchId);
-                        // Trigger completion actions here, if any
-                        return;
-                    }
+                        console.log(`User direction: ${userDirection}, Step index: ${currentStepIndex}, Distance to step end: ${distanceToStepEnd}`);
 
-                    if (distanceToNextStepEnd < lastDistanceToStepEnd) {
-                        lastDistanceToStepEnd = distanceToNextStepEnd;
-                    } else {
-                        // User is moving away from the next step, suggesting they've completed the current step
-                        currentStepIndex++;
-                        lastStraightAnnouncement = Number.NEGATIVE_INFINITY;
-                        if (currentStepIndex < steps.length) {
-                            // Announce new step instruction
-                            const instruction = simplifyDirection(steps[currentStepIndex].instructions, steps[currentStepIndex].distance.text);
-                            speak(instruction);
+                        // Check if it's time to announce the next step
+                        if (distanceToStepEnd < 10 && !isNextStepAnnounced) {
+                            // Announce step only if the user is facing the correct direction or within a certain degree offset
+                            if (Math.abs(userDirection - currentStep.bearing) <= 45) {
+                                const nextStep = steps[currentStepIndex + 1];
+                                const instruction = simplifyDirection(nextStep.instructions, nextStep.distance.text);
+                                console.log(`Announcing instruction: ${instruction}`);
+                                speak(instruction);
+                                isNextStepAnnounced = true;
+                            } else {
+                                console.log("User is not facing the correct direction to announce the next step.");
+                            }
                         }
-                        return;
-                    }
 
-                    // Announce "Proceed straight" if needed
-                    if (!currentStep.maneuver && distanceToNextStepEnd < lastStraightAnnouncement - 50) {
-                        speak("Proceed straight.");
-                        lastStraightAnnouncement = distanceToNextStepEnd;
+                        // Move to the next step if the user has passed the current step end location
+                        if (distanceToStepEnd < 5 && isNextStepAnnounced) {
+                            currentStepIndex++;
+                            isNextStepAnnounced = false;
+                            console.log(`Moving to step index: ${currentStepIndex}`);
+                        }
+
+                        // Periodic "Proceed Straight" announcement in long straight paths
+                        if (!currentStep.maneuver && distanceForNextStraightAnnouncement <= 0) {
+                            speak("Proceed straight for " + currentStep.distance.text + ".");
+                            distanceForNextStraightAnnouncement = 20; // Reset after each announcement
+                        } else {
+                            distanceForNextStraightAnnouncement -= distanceToStepEnd; // Decrease for next announcement
+                        }
+
+                        // Check if the user has reached the final destination
+                        if (currentStepIndex >= steps.length - 1 && distanceToStepEnd < 10) {
+                            console.log("User has reached the final destination.");
+                            speak("You have reached your destination.");
+                            stopWatchingPosition(); // Clear the interval
+                        }
+                    } else {
+                        console.log("All steps have been announced. Stopping position watch.");
+                        stopWatchingPosition(); // Clear the interval if all steps have been announced
                     }
-                },
-                function(error) {
-                    console.error('Error with geolocation watchPosition:', error);
-                },
-                {
+                }, error => {
+                    console.error('Error getting current position:', error);
+                }, {
                     enableHighAccuracy: true,
                     maximumAge: 0,
                     timeout: 10000
-                }
-            );
+                });
+            }
+
+            // Start checking user position and announce steps
+            checkAndAnnounceSteps(); // Initial call
+            watchId = setInterval(checkAndAnnounceSteps, 3000); // Update every 3 seconds
         }
 
 
@@ -1217,6 +1264,7 @@
                                 tripInterval = null;
                             }
                             $('#tripCompletionModal').modal('show');
+                            speak("You have reached your destination.");
 
                         } else {
                             console.error('Error completing trip:', data.error);
