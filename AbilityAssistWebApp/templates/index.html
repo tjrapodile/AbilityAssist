@@ -929,6 +929,10 @@
 
             directionsService.route(request, function (result, status) {
                 if (status === 'OK') {
+                    if (userLocationMarker) {
+                        userLocationMarker.setMap(null);
+                        userLocationMarker = null; // Set to null if you don't plan to use it again
+                    }
                     directionsRenderer.setDirections(result);
                     // Display distance and duration from the response
                     const distance = result.routes[0].legs[0].distance.text;
