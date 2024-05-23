@@ -1014,30 +1014,21 @@
         function watchUserPositionAndAnnounceSteps(steps) {
             console.log('Starting to watch user position with steps:', steps);
             let currentStepIndex = 0;
+            let lastAnnouncedStepIndex = -1; // To track the last announced step index
             let offRoute = false;
-            let lastAnnouncedDistance = Number.MAX_VALUE;
-            let stationaryCounter = 0; // Counter to check if the user is stationary
-            let lastUserLocation; // To store the last announced user location
 
             watchId = navigator.geolocation.watchPosition(
                 function(position) {
                     console.log('Current position:', position);
                     const userLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
                     const currentStep = steps[currentStepIndex];
+                    const distanceToNextStep = google.maps.geometry.spherical.computeDistanceBetween(userLocation, currentStep.end_location);
 
-                    // Check if the user has moved significantly since the last announcement
-                    if (lastUserLocation && google.maps.geometry.spherical.computeDistanceBetween(lastUserLocation, userLocation) < 5) {
-                        stationaryCounter++;
-                    } else {
-                        stationaryCounter = 0; // Reset counter if the user has moved
-                    }
-                    lastUserLocation = userLocation; // Update lastUserLocation with the current location
-
-                    // Re-announce navigation instruction if the user is stationary for over 10 seconds (assuming position checks every 3 seconds)
-                    if (stationaryCounter >= 4) {
-                        const instruction = `You are still ${Math.round(lastAnnouncedDistance)} meters from your next action. ${simplifyDirection(currentStep.instructions, currentStep.distance.text)}`;
+                    // Announce the initial direction when the trip starts
+                    if (lastAnnouncedStepIndex === -1) {
+                        const instruction = `${simplifyDirection(currentStep.instructions, currentStep.distance.text)}`;
                         speak(instruction);
-                        stationaryCounter = 0; // Reset counter after re-announcing
+                        lastAnnouncedStepIndex = 0; // Update the last announced step index
                     }
 
                     // If the user is off-route, prompt them to return to the route
@@ -1048,27 +1039,29 @@
                             speak("You're off the route, please return to the route.");
                         }
                     } else {
+                        if (offRoute) {
+                            speak("You're back on the route, continue on your way.");
+                        }
                         offRoute = false;
                     }
 
-                    // Announce the distance to the next action more frequently as the user gets closer
-                    const distanceToNextStep = google.maps.geometry.spherical.computeDistanceBetween(userLocation, currentStep.end_location);
-                    if (distanceToNextStep < lastAnnouncedDistance) {
-                        const instruction = `In ${Math.round(distanceToNextStep)} meters,${simplifyDirection(currentStep.instructions, currentStep.distance.text)}`;
-                        speak(instruction);
-                        lastAnnouncedDistance = distanceToNextStep;
+                    // Announce the next action if the user has moved at least 20 meters from the previous step's end location
+                    if (distanceToNextStep < 10 || (lastAnnouncedStepIndex !== currentStepIndex && google.maps.geometry.spherical.computeDistanceBetween(steps[lastAnnouncedStepIndex].end_location, userLocation) >= 20)) {
+                        if (currentStepIndex < steps.length - 1) {
+                            // Announce current and next step directions
+                            const nextStep = steps[currentStepIndex + 1];
+                            const instruction = `${simplifyDirection(currentStep.instructions, currentStep.distance.text)} then ${simplifyDirection(nextStep.instructions, nextStep.distance.text)}`;
+                            speak(instruction);
+                        } else {
+                            // Last step reached, announce destination arrival
+                            speak("You have reached your destination.");
+                        }
+                        lastAnnouncedStepIndex = currentStepIndex; // Update the last announced step index
                     }
 
                     // Advance to the next step if the user is close to the current step's end location
-                    if (distanceToNextStep < 10) {
-                        currentStepIndex++;
-                        lastAnnouncedDistance = Number.MAX_VALUE; // Reset the last announced distance
-                    }
-
-                    // Announce arrival at the final destination
-                    if (currentStepIndex >= steps.length) {
-                        speak("You have reached your destination.");
-                        navigator.geolocation.clearWatch(watchId);
+                    if (distanceToNextStep < 10 && currentStepIndex < steps.length - 1) {
+                        currentStepIndex++; // Move to the next step
                     }
                 },
                 function(error) {
