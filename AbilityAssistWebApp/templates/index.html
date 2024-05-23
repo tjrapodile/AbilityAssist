@@ -1021,90 +1021,95 @@
             });
         }
 
+        function watchUserPositionAndAnnounceSteps(steps) {
+            let currentStepIndex = 0;
+            let lastPosition = null;
+            let isNextStepAnnounced = false;
+
+            watchId = navigator.geolocation.watchPosition(position => {
+                const userPosition = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+
+                if (lastPosition && !hasMovedSignificantly(userPosition, lastPosition)) {
+                    return; // No significant movement, do nothing
+                }
+
+                lastPosition = userPosition; // Update last known position
+
+                currentStepIndex = findClosestStepIndex(userPosition, steps, currentStepIndex);
+                const currentStep = steps[currentStepIndex];
+                const distanceToStepEnd = google.maps.geometry.spherical.computeDistanceBetween(userPosition, currentStep.end_location);
+
+                if (shouldAnnounceNextStep(distanceToStepEnd, isNextStepAnnounced, currentStepIndex, steps.length)) {
+                    announceNextStep(currentStepIndex, steps);
+                    isNextStepAnnounced = true;
+                }
+
+                if (isNextStepAnnounced && distanceToStepEnd < 10) {
+                    isNextStepAnnounced = false; // Reset for the next step
+                }
+
+                if (isFinalDestinationReached(distanceToStepEnd, currentStepIndex, steps.length)) {
+                    handleFinalDestination();
+                    navigator.geolocation.clearWatch(watchId);
+                }
+            }, error => {
+                console.error('Error with geolocation watchPosition:', error);
+            }, {
+                enableHighAccuracy: true,
+                maximumAge: 0,
+                timeout: 10000
+            });
+        }
+
+        function hasMovedSignificantly(newPosition, lastPosition) {
+            const MINIMUM_DISTANCE_METERS = 10; // Minimum distance to consider as significant movement
+            return google.maps.geometry.spherical.computeDistanceBetween(newPosition, lastPosition) > MINIMUM_DISTANCE_METERS;
+        }
+
+        function findClosestStepIndex(userPosition, steps, currentStepIndex) {
+            let closestStepIndex = currentStepIndex;
+            let minDistance = Number.MAX_VALUE;
+
+            for (let i = currentStepIndex; i < steps.length; i++) {
+                const stepLocation = new google.maps.LatLng(steps[i].start_location.lat(), steps[i].start_location.lng());
+                const distance = google.maps.geometry.spherical.computeDistanceBetween(userPosition, stepLocation);
+
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestStepIndex = i;
+                }
+            }
+            return closestStepIndex;
+        }
+
+        function shouldAnnounceNextStep(distanceToStepEnd, isNextStepAnnounced, currentStepIndex, stepsLength) {
+            const ANNOUNCEMENT_THRESHOLD_METERS = 30; // Distance from the end of the step to announce the next step
+            return distanceToStepEnd < ANNOUNCEMENT_THRESHOLD_METERS && !isNextStepAnnounced && currentStepIndex < stepsLength - 1;
+        }
+
+        function announceNextStep(currentStepIndex, steps) {
+            const nextStep = steps[currentStepIndex + 1]; // Get the next step
+            const instruction = simplifyDirection(nextStep.instructions, nextStep.distance.text);
+            speak(instruction);
+        }
+
+        function isFinalDestinationReached(distanceToStepEnd, currentStepIndex, stepsLength) {
+            const DESTINATION_THRESHOLD_METERS = 10; // Distance from the final destination to consider as reached
+            return distanceToStepEnd < DESTINATION_THRESHOLD_METERS && currentStepIndex === stepsLength - 1;
+        }
+
+        function handleFinalDestination() {
+            speak("You have reached your destination.");
+        }
+
         function simplifyDirection(instruction, distance) {
-            // Remove HTML tags and decode HTML entities
             var div = document.createElement('div');
             div.innerHTML = instruction;
             var text = div.textContent || div.innerText || "";
 
-            var direction = text.includes('left') ? 'Turn left' :
-                            text.includes('right') ? 'Turn right' :
-                            'Proceed Straight';
-
+            var direction = text.includes('left') ? 'Turn left' : text.includes('right') ? 'Turn right' : 'Proceed Straight';
             var detailedInstruction = `In ${distance}, ${direction}.`;
-            console.log('Detailed instruction:', detailedInstruction);
             return detailedInstruction;
-        }
-
-        function watchUserPositionAndAnnounceSteps(steps) {
-            console.log("Starting to watch user position and announce steps.");
-            let currentStepIndex = 0;
-            let isNextStepAnnounced = false;
-            let distanceForNextStraightAnnouncement = 20; // meters
-
-            function checkAndAnnounceSteps() {
-                console.log("Checking and announcing steps...");
-                navigator.geolocation.getCurrentPosition(position => {
-                    const userPosition = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-                    if (currentStepIndex < steps.length) {
-                        const currentStep = steps[currentStepIndex];
-                        const stepLocation = new google.maps.LatLng(currentStep.end_location.lat(), currentStep.end_location.lng());
-                        const distanceToStepEnd = google.maps.geometry.spherical.computeDistanceBetween(userPosition, stepLocation);
-                        const userDirection = getDeviceOrientation();
-
-                        console.log(`User direction: ${userDirection}, Step index: ${currentStepIndex}, Distance to step end: ${distanceToStepEnd}`);
-
-                        // Check if it's time to announce the next step
-                        if (distanceToStepEnd < 10 && !isNextStepAnnounced) {
-                            // Announce step only if the user is facing the correct direction or within a certain degree offset
-                            if (Math.abs(userDirection - currentStep.bearing) <= 45) {
-                                const nextStep = steps[currentStepIndex + 1];
-                                const instruction = simplifyDirection(nextStep.instructions, nextStep.distance.text);
-                                console.log(`Announcing instruction: ${instruction}`);
-                                speak(instruction);
-                                isNextStepAnnounced = true;
-                            } else {
-                                console.log("User is not facing the correct direction to announce the next step.");
-                            }
-                        }
-
-                        // Move to the next step if the user has passed the current step end location
-                        if (distanceToStepEnd < 5 && isNextStepAnnounced) {
-                            currentStepIndex++;
-                            isNextStepAnnounced = false;
-                            console.log(`Moving to step index: ${currentStepIndex}`);
-                        }
-
-                        // Periodic "Proceed Straight" announcement in long straight paths
-                        if (!currentStep.maneuver && distanceForNextStraightAnnouncement <= 0) {
-                            speak("Proceed straight for " + currentStep.distance.text + ".");
-                            distanceForNextStraightAnnouncement = 20; // Reset after each announcement
-                        } else {
-                            distanceForNextStraightAnnouncement -= distanceToStepEnd; // Decrease for next announcement
-                        }
-
-                        // Check if the user has reached the final destination
-                        if (currentStepIndex >= steps.length - 1 && distanceToStepEnd < 10) {
-                            console.log("User has reached the final destination.");
-                            speak("You have reached your destination.");
-                            stopWatchingPosition(); // Clear the interval
-                        }
-                    } else {
-                        console.log("All steps have been announced. Stopping position watch.");
-                        stopWatchingPosition(); // Clear the interval if all steps have been announced
-                    }
-                }, error => {
-                    console.error('Error getting current position:', error);
-                }, {
-                    enableHighAccuracy: true,
-                    maximumAge: 0,
-                    timeout: 10000
-                });
-            }
-
-            // Start checking user position and announce steps
-            checkAndAnnounceSteps(); // Initial call
-            watchId = setInterval(checkAndAnnounceSteps, 3000); // Update every 3 seconds
         }
 
 
