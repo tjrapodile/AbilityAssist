@@ -948,11 +948,11 @@
                         // After announcing the total distance and duration, watch the user's position and announce steps
                         const steps = result.routes[0].legs[0].steps;
                         if (steps.length > 0) {
-                            let firstInstruction = simplifyDirection(steps[0].instructions);
+                            let firstInstruction = simplifyDirection(steps[0].instructions, steps[0].distance.text);
                             speak(firstInstruction, function() {
                                 // Begin watching the user's position and announce subsequent steps
                                 setupLocationUpdateInterval();
-                                watchUserPositionAndAnnounceSteps(steps.slice(1)); // Pass remaining steps except the first one
+                                watchUserPositionAndAnnounceSteps(steps); // Pass remaining steps except the first one
                             });
                         }
                     });
@@ -986,45 +986,17 @@
             });
         }
 
-        function simplifyDirection(step, distance) {
-            console.log('Received step:', step);
-            console.log('Received distance:', distance);
-
+        function simplifyDirection(instruction, distance) {
             // Remove HTML tags and decode HTML entities
             var div = document.createElement('div');
-            div.innerHTML = step;
-            var instruction = div.textContent || div.innerText || "";
+            div.innerHTML = instruction;
+            var text = div.textContent || div.innerText || "";
 
-            if (!instruction) {
-                console.error('No instruction text found in step:', step);
-                return ''; // Return an empty string or some default message
-            }
+            var direction = text.includes('left') ? 'Turn left' :
+                            text.includes('right') ? 'Turn right' :
+                            'Proceed';
 
-            console.log('Stripped instruction:', instruction);
-
-            // Parsing the instruction for directional keywords
-            var direction = instruction.includes('left') ? 'left' :
-                            instruction.includes('right') ? 'right' :
-                            instruction.includes('Head') ? 'forward' : '';
-            console.log('Parsed direction:', direction);
-
-            var detailedInstruction = '';
-
-            switch (direction) {
-                case 'left':
-                    detailedInstruction = `Turn left and move forward ${distance}.`;
-                    break;
-                case 'right':
-                    detailedInstruction = `Turn right and move forward ${distance}.`;
-                    break;
-                case 'forward':
-                    detailedInstruction = `Head forward ${distance}.`;
-                    break;
-                default:
-                    detailedInstruction = `Continue for ${distance}.`;
-                    break;
-            }
-
+            var detailedInstruction = `${direction} for ${distance}.`;
             console.log('Detailed instruction:', detailedInstruction);
             return detailedInstruction;
         }
@@ -1046,30 +1018,20 @@
                         console.log(`Distance to next step end: ${distanceToStepEnd} meters`);
 
                         if (distanceToStepEnd < 30 && !stepAnnounced) {
-                            let detailedInstruction;
-                            if (currentStepIndex === 0) {
-                                detailedInstruction = "Follow the walking route.";
-                            } else {
-                                const distanceText = distanceToStepEnd < 1000 ? `${Math.round(distanceToStepEnd)} meters` : `${(distanceToStepEnd / 1000).toFixed(1)} kilometers`;
-                                const div = document.createElement('div');
-                                div.innerHTML = step.instructions;
-                                const instructionText = div.textContent || div.innerText || "";
-                                const direction = instructionText.toLowerCase().includes('left') ? 'Turn left' :
-                                                  instructionText.toLowerCase().includes('right') ? 'Turn right' :
-                                                  'Head forward';
-                                detailedInstruction = `${direction} and continue for ${distanceText}.`;
+                            const instruction = simplifyDirection(step.instructions, step.distance.text);
+                            let nextInstruction = '';
+                            if (steps[currentStepIndex + 1]) {
+                                nextInstruction = ` Then ${simplifyDirection(steps[currentStepIndex + 1].instructions, steps[currentStepIndex + 1].distance.text)}`;
                             }
-                            console.log('Voice instruction:', detailedInstruction);
-                            speak(detailedInstruction);
+                            const fullInstruction = `${instruction}${nextInstruction}`;
+                            speak(fullInstruction);
                             stepAnnounced = true;
                         }
 
-                        // Reset stepAnnounced if the user has moved significantly towards the next step
-                        if (distanceToStepEnd > 50 && stepAnnounced) {
+                        if (distanceToStepEnd > 30 && stepAnnounced) {
                             stepAnnounced = false;
                         }
 
-                        // Move to the next step if the user is close enough to the end of the current step
                         if (distanceToStepEnd < 10) {
                             currentStepIndex++;
                             stepAnnounced = false;
