@@ -1010,44 +1010,43 @@
         }
 
         function watchUserPositionAndAnnounceSteps(steps) {
-            console.log('Starting to watch user position with steps:', steps);
             let currentStepIndex = 0;
-            let stepAnnounced = false;
+            let lastDistanceToStepEnd = Number.POSITIVE_INFINITY;
+            let lastStraightAnnouncement = Number.NEGATIVE_INFINITY;
 
             watchId = navigator.geolocation.watchPosition(
                 function(position) {
-                    console.log('Current position:', position);
-                    const userLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                    const userPosition = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                    const currentStep = steps[currentStepIndex];
+                    const nextStepLocation = new google.maps.LatLng(currentStep.end_location.lat(), currentStep.end_location.lng());
+                    const distanceToNextStepEnd = google.maps.geometry.spherical.computeDistanceBetween(userPosition, nextStepLocation);
 
-                    if (currentStepIndex < steps.length) {
-                        const step = steps[currentStepIndex];
-                        const stepLocation = new google.maps.LatLng(step.end_location.lat(), step.end_location.lng());
-                        const distanceToStepEnd = google.maps.geometry.spherical.computeDistanceBetween(userLocation, stepLocation);
-                        console.log(`Distance to next step end: ${distanceToStepEnd} meters`);
-
-                        if (distanceToStepEnd < 30 && !stepAnnounced) {
-                            const instruction = simplifyDirection(step.instructions, step.distance.text);
-                            let nextInstruction = '';
-                            if (steps[currentStepIndex + 1]) {
-                                nextInstruction = ` Then ${simplifyDirection(steps[currentStepIndex + 1].instructions, steps[currentStepIndex + 1].distance.text)}`;
-                            }
-                            const fullInstruction = `${instruction}${nextInstruction}`;
-                            speak(fullInstruction);
-                            stepAnnounced = true;
-                        }
-
-                        if (distanceToStepEnd > 30 && stepAnnounced) {
-                            stepAnnounced = false;
-                        }
-
-                        if (distanceToStepEnd < 10) {
-                            currentStepIndex++;
-                            stepAnnounced = false;
-                        }
-                    } else {
-                        console.log('User has reached the destination.');
-                        navigator.geolocation.clearWatch(watchId);
+                    if (currentStepIndex === steps.length - 1 && distanceToNextStepEnd < 10) {
+                        // Announce arrival at final destination
                         speak("You have reached your destination.");
+                        navigator.geolocation.clearWatch(watchId);
+                        // Trigger completion actions here, if any
+                        return;
+                    }
+
+                    if (distanceToNextStepEnd < lastDistanceToStepEnd) {
+                        lastDistanceToStepEnd = distanceToNextStepEnd;
+                    } else {
+                        // User is moving away from the next step, suggesting they've completed the current step
+                        currentStepIndex++;
+                        lastStraightAnnouncement = Number.NEGATIVE_INFINITY;
+                        if (currentStepIndex < steps.length) {
+                            // Announce new step instruction
+                            const instruction = simplifyDirection(steps[currentStepIndex].instructions, steps[currentStepIndex].distance.text);
+                            speak(instruction);
+                        }
+                        return;
+                    }
+
+                    // Announce "Proceed straight" if needed
+                    if (!currentStep.maneuver && distanceToNextStepEnd < lastStraightAnnouncement - 50) {
+                        speak("Proceed straight.");
+                        lastStraightAnnouncement = distanceToNextStepEnd;
                     }
                 },
                 function(error) {
