@@ -181,7 +181,7 @@
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         {% if user.is_authenticated %}
-                        <i class="fas fa-user user-icon"></i>{{ user.username }}
+                        <i class="fas fa-user user-icon"></i>{{ user.get_full_name }}
                         {% else %}
                         Login to your Account
                         {% endif %}
