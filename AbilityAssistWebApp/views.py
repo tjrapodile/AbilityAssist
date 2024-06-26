@@ -13,7 +13,7 @@ from django.core.paginator import Paginator
 from django.db.models import F, Count
 from django.db.models import Window
 from django.db.models.functions import DenseRank
-from django.http import JsonResponse, HttpResponse, FileResponse
+from django.http import JsonResponse, HttpResponse, FileResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils import timezone
@@ -47,6 +47,10 @@ def register(request):
     return render(request, 'register.html', {'form': form})
 
 def user_login(request):
+    if request.user.is_authenticated:
+        # Redirect to the index page (or any other target page)
+        return HttpResponseRedirect(reverse('index'))
+
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -454,7 +458,7 @@ def user_stats(request):
     return render(request, 'user_stats.html', context)
 
 def about(request):
-    aboutImage = AboutImage.objects.first()
+    aboutImage = AboutImage.objects.last()
     context = {'aboutImage': aboutImage}
     return render(request, 'about.html', context)
 

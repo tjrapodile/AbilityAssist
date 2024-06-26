@@ -16,7 +16,7 @@ class Trip(models.Model):
 
 
     def __str__(self):
-        return f'{self.user.username} trip from {self.start_point} to {self.end_point}'
+        return f'Mobile No/Username:{self.user.username} on a trip from {self.start_point} to {self.end_point}'
 
 class LocationUpdate(models.Model):
     trip = models.ForeignKey('Trip', related_name='location_updates', on_delete=models.CASCADE)
@@ -35,9 +35,15 @@ class InitialGeolocation(models.Model):
     latitude = models.CharField(max_length=50)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return self.longitude + '' + self.latitude
+
 class FinalGeolocation(models.Model):
     value = models.CharField(max_length=50)
     name = models.CharField(max_length = 100)
+
+    def __str__(self):
+        return self.name
 
 
 class AboutImage(models.Model):

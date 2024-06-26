@@ -152,8 +152,8 @@
 
         .about-image-wrapper img {
             width: 100%; /* Make the image width match its container */
-            height: 400px; /* Set the height to 200px */
-            object-fit: cover; /* Maintain aspect ratio without stretching */
+            height: 430px; /* Set the height to 200px */
+            object-fit: contain; /* Maintain aspect ratio without stretching */
             display: block; /* Remove inline-element margin */
             margin: auto; /* Center the image if needed */
         }
@@ -219,12 +219,12 @@
         <div class="col-md-8">
             <div class="about-content">
                 <div class="about-image-wrapper">
-                    <a href = "https://www.tut.ac.za/"><img src="{{ aboutImage.imageURL }}" alt="{{ aboutImage.title }}"></a>
+                    <a href="https://www.tut.ac.za/"><img src="{{ aboutImage.imageURL }}" alt="{{ aboutImage.title }}"></a>
                 </div>
                 <h1 class="about-heading">About AbilityAssist</h1>
-                <p>The objective of AbilityAssist is to provide comprehensive assistance to individuals living with visual impairment at Tshwane University of Technology South Campus. We aim to empower users by employing cutting-edge sound detection technology, obstacle identification features, and voice-over assistance to guide them seamlessly throughout the campus. Additionally, AbilityAssist calculates distances for accurate arrival times to destinations, ensuring efficient navigation for users.</p>
-                <p>We believe that everyone, regardless of their abilities, should have equal access to opportunities and resources. That's why we work tirelessly to develop innovative solutions that improve the lives of people with disabilities.</p>
-                <p>With a team of dedicated professionals and experts in accessibility, we strive to create a more inclusive society where everyone can thrive and reach their full potential.</p>
+                <p>AbilityAssist is committed to enhancing the mobility experience for all individuals at the Tshwane University of Technology South Campus. By leveraging the Google Maps API for precise location and routing services, coupled with intuitive voice-over assistance, we ensure that every user can navigate the campus with ease. Our platform is designed to facilitate seamless travel to and from various destinations on campus, providing accurate arrival times and efficient route optimization.</p>
+                <p>We envision a world where access to opportunities and resources is not hindered by physical limitations. At AbilityAssist, we are dedicated to breaking down barriers and fostering an environment of inclusivity and empowerment.</p>
+                <p>Our team of experts and professionals is passionate about developing accessible solutions that cater to the needs of a diverse user base. We are driven by the belief in creating a more inclusive society, where everyone has the freedom to explore, engage, and excel.</p>
             </div>
         </div>
     </div>
@@ -233,19 +233,19 @@
 <!-- Additional Features Section -->
 <div class="container additional-features">
     <div class="row justify-content-center">
-       <div class="col-md-8">
+        <div class="col-md-8">
             <div class="features">
                 <div class="feature left">
-                    <h2>Sound Detection</h2>
-                    <p>AbilityAssist utilizes cutting-edge sound detection technology to help users navigate the campus safely.</p>
+                    <h2>Google Maps Integration</h2>
+                    <p>Our application harnesses the power of Google Maps to provide precise location tracking and route planning, ensuring you reach your destinations with ease.</p>
                 </div>
                 <div class="feature center">
-                    <h2>Distances </h2>
-                    <p>We calculate distances for accurate arrival times to destinations, ensuring efficient navigation for users.</p>
+                    <h2>Efficient Navigation</h2>
+                    <p>With real-time updates on distances and routes, our system offers efficient navigation options to save you time and enhance your campus experience.</p>
                 </div>
                 <div class="feature right">
                     <h2>Voice-Over Assistance</h2>
-                    <p>Our voice-over assistance feature provides real-time guidance and instructions to users, enhancing their navigation experience.</p>
+                    <p>Our platform includes voice-over assistance to guide you through selecting a destination and navigating the campus, making it accessible to users with visual impairments and ensuring a user-friendly experience for all.</p>
                 </div>
             </div>
         </div>
@@ -253,10 +253,25 @@
 </div>
 
 <footer>
-    <div class="container">
-        <p style="font-size: 14px;">&copy; 2024 AbilityAssist</p>
-    </div>
-</footer>
+        <div class="container">
+            <p>&copy; 2024 AbilityAssist</p>
+            <div class="mt-5">
+                <ul class="list-inline">
+                    <li class="list-inline-item">
+                        <a href="https://www.facebook.com/profile.php?id=61561203582596&mibextid=ZbWKwL" target="_blank">
+                            <i class="fab fa-facebook-f footer-social-icon"></i>
+                        </a>
+                    </li>
+                    <li class="list-inline-item">
+                        <a href="https://x.com/AbilityassistO?t=x_ihgnVah7sj7qn9nn41cw&s=08" target="_blank">
+                            <i class="fab fa-twitter footer-social-icon"></i>
+                        </a>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </footer>
 
 
 <!-- Bootstrap JS -->

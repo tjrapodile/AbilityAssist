@@ -1,6 +1,10 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from docx.shared import Inches
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfbase.pdfmetrics import stringWidth
+
 from .models import Trip, FinalGeolocation, InitialGeolocation, AboutImage, LocationUpdate
 import csv
 from reportlab.pdfgen import canvas
@@ -81,15 +85,50 @@ def export_to_csv(modeladmin, request, queryset):
 
 export_to_csv.short_description = "Export Selected to CSV"
 
+
 def export_to_pdf(modeladmin, request, queryset):
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="selected_data.pdf"'
-    p = canvas.Canvas(response)
+    p = canvas.Canvas(response, pagesize=letter)
 
-    y_pos = 800
+    p.setFont("Helvetica-Bold", 14)
+    model_name = modeladmin.model._meta.verbose_name_plural.title()
+    p.drawString(100, 780, f"{model_name} Report")
+
+    # Dynamic headers
+    field_names = [field.verbose_name.title() for field in modeladmin.model._meta.fields]
+    y_pos = 780
+    p.setFont("Helvetica", 12)
+    headers = " | ".join(field_names)
+    p.drawString(100, y_pos, headers)
+
+    def draw_wrapped_text(text, x, y, max_width):
+        words = text.split()
+        wrapped_lines = []
+        current_line = ""
+        for word in words:
+            # Check if adding the next word exceeds the max width
+            test_line = f"{current_line} {word}".strip()
+            if stringWidth(test_line, "Helvetica", 10) <= max_width:
+                current_line = test_line
+            else:
+                wrapped_lines.append(current_line)
+                current_line = word
+        wrapped_lines.append(current_line)  # Add the last line
+
+        # Draw the lines
+        for line in wrapped_lines:
+            p.drawString(x, y, line)
+            y -= 14  # Adjust line spacing
+        return y  # Return the Y position after the last line
+
+    p.setFont("Helvetica", 10)
+    y_pos -= 30
+    max_width = 500  # Maximum width for text before wrapping
+
     for obj in queryset:
-        p.drawString(100, y_pos, str(obj))
-        y_pos -= 20
+        data_str = " | ".join([str(getattr(obj, field.name)) for field in modeladmin.model._meta.fields])
+        y_pos = draw_wrapped_text(data_str, 100, y_pos, max_width)
         if y_pos < 100:
             p.showPage()
             y_pos = 800
@@ -97,16 +136,33 @@ def export_to_pdf(modeladmin, request, queryset):
     p.showPage()
     p.save()
     return response
+
+
 export_to_pdf.short_description = "Export Selected to PDF"
 
 def export_to_docx(modeladmin, request, queryset):
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
     response['Content-Disposition'] = 'attachment; filename="selected_data.docx"'
     doc = Document()
-    doc.add_heading('Selected Data', 0)
 
+    model_name = modeladmin.model._meta.verbose_name_plural.title()
+    doc.add_heading(f'{model_name} Report', 0)
+
+    table = doc.add_table(rows=1, cols=len(modeladmin.model._meta.fields))
+    hdr_cells = table.rows[0].cells
+
+    # Dynamically adjust column widths
+    table.autofit = False
+    for i, field in enumerate(modeladmin.model._meta.fields):
+        hdr_cells[i].text = field.verbose_name.title()
+        hdr_cells[i].width = Inches(1)  # Adjust the width as necessary
+
+    # Table data
     for obj in queryset:
-        doc.add_paragraph(str(obj))
+        row_cells = table.add_row().cells
+        for i, field in enumerate(modeladmin.model._meta.fields):
+            row_cells[i].text = str(getattr(obj, field.name))
+            row_cells[i].width = Inches(1)  # Adjust the width as necessary
 
     docx_stream = BytesIO()
     doc.save(docx_stream)
@@ -118,7 +174,18 @@ export_to_docx.short_description = "Export Selected to DOCX"
 def export_to_txt(modeladmin, request, queryset):
     response = HttpResponse(content_type='text/plain')
     response['Content-Disposition'] = 'attachment; filename="selected_data.txt"'
-    lines = [str(obj) + "\n" for obj in queryset]
+    model_name = modeladmin.model._meta.verbose_name_plural.title()
+    lines = [f"{model_name} Report\n"]
+
+    # Dynamic headers
+    field_names = [field.verbose_name.title() for field in modeladmin.model._meta.fields]
+    lines.append(" | ".join(field_names) + "\n")
+
+    # Data
+    for obj in queryset:
+        row = [str(getattr(obj, field.name)) for field in modeladmin.model._meta.fields]
+        lines.append(" | ".join(row) + "\n")
+
     response.writelines(lines)
     return response
 export_to_txt.short_description = "Export Selected to TXT"
