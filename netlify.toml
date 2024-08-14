@@ -1,0 +1,11 @@
+[build]
+base = "/"
+publish = "staticfiles/"
+command = "python manage.py collectstatic --noinput"
+
+[build.environment]
+DJANGO_SETTINGS_MODULE = "AbilityAssist.settings"
+PYTHON_VERSION = "3.10.0"
+
+[context.production.environment]
+DJANGO_DEBUG = "false"
